@@ -21,21 +21,109 @@ import { Language } from "./types";
 
 type View = "app" | "pricing" | "privacy" | "terms";
 
+const API_BASE_URL = ((import.meta as any).env?.VITE_API_BASE_URL || "").replace(/\/$/, "");
+
+function extractJsonObject(text: string) {
+  const source = text.trim();
+  const fencedJson = source.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const candidate = fencedJson?.[1]?.trim() || source;
+
+  if (candidate.startsWith("{") && candidate.endsWith("}")) {
+    return candidate;
+  }
+
+  const start = candidate.indexOf("{");
+  if (start === -1) return null;
+
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let i = start; i < candidate.length; i++) {
+    const char = candidate[i];
+
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+
+    if (char === "\\") {
+      escaped = true;
+      continue;
+    }
+
+    if (char === "\"") {
+      inString = !inString;
+      continue;
+    }
+
+    if (inString) continue;
+
+    if (char === "{") depth++;
+    if (char === "}") depth--;
+
+    if (depth === 0) {
+      return candidate.slice(start, i + 1);
+    }
+  }
+
+  return null;
+}
+
+function parseGeneratedPrompt(text: string, platform: Platform, lang: Language): GeneratedPrompt {
+  const jsonObject = extractJsonObject(text);
+
+  if (jsonObject) {
+    try {
+      const parsed = JSON.parse(jsonObject);
+      if (parsed && typeof parsed === "object" && parsed.engineeredPrompt) {
+        return {
+          isNonsense: Boolean(parsed.isNonsense),
+          goal: String(parsed.goal || `Prompt architecture for ${platform}`),
+          engineeredPrompt: String(parsed.engineeredPrompt),
+          explanation: String(parsed.explanation || "Generated from the user's request."),
+        };
+      }
+    } catch {
+      // Fall through to the text wrapper below.
+    }
+  }
+
+  const normalized = text
+    .replace(/^```(?:markdown|md|text)?/i, "")
+    .replace(/```$/i, "")
+    .replace(/^markdown\\?/i, "")
+    .trim();
+
+  return {
+    isNonsense: false,
+    goal: `Prompt architecture for ${platform}`,
+    engineeredPrompt: normalized || text,
+    explanation:
+      lang === "fr"
+        ? "Le fournisseur a renvoye du texte au lieu d'un JSON strict, donc Promptuno l'a converti en reponse utilisable."
+        : "The provider returned text instead of strict JSON, so Promptuno converted it into a usable response.",
+  };
+}
+
 async function generatePromptResponse(systemInstruction: string, contents: string) {
+  const strictSystemInstruction = `${systemInstruction}
+
+CRITICAL OUTPUT RULE: Return only one valid JSON object matching the requested schema. Do not return markdown, code fences, prose outside JSON, or labels like "markdown".`;
   const isStaticHost =
     typeof window !== "undefined" &&
     (window.location.hostname.endsWith("github.io") ||
       window.location.hostname.endsWith("pages.dev") ||
       window.location.hostname.endsWith("netlify.app"));
 
-  if (!isStaticHost) {
-    const localResponse = await fetch("/api/generate", {
+  if (API_BASE_URL || !isStaticHost) {
+    const localResponse = await fetch(`${API_BASE_URL}/api/generate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        systemInstruction,
+        systemInstruction: strictSystemInstruction,
         contents,
       }),
     }).catch(() => null);
@@ -61,7 +149,7 @@ async function generatePromptResponse(systemInstruction: string, contents: strin
     json: "true",
     private: "true",
     temperature: "0.7",
-    system: systemInstruction,
+    system: strictSystemInstruction,
   });
   const publicResponse = await fetch(
     `https://text.pollinations.ai/${encodeURIComponent(contents)}?${params.toString()}`,
@@ -239,14 +327,7 @@ JSON structure:
       const result = await aiPromise;
       const responseText = result.text;
       
-      let cleanJson = responseText;
-      if (cleanJson.includes("```json")) {
-        cleanJson = cleanJson.split("```json")[1].split("```")[0].trim();
-      } else if (cleanJson.includes("```")) {
-        cleanJson = cleanJson.split("```")[1].split("```")[0].trim();
-      }
-
-      const data = JSON.parse(cleanJson);
+      const data = parseGeneratedPrompt(responseText, platform, lang);
       
       if (data.isNonsense) {
         setIsAnalyzing(false);

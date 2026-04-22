@@ -133,7 +133,20 @@ async function generateWithPollinations(systemInstruction: string, contents: str
 async function startServer() {
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
+  const CORS_ORIGIN = process.env.CORS_ORIGIN || "*";
 
+  app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", CORS_ORIGIN);
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
+
+    if (req.method === "OPTIONS") {
+      res.sendStatus(204);
+      return;
+    }
+
+    next();
+  });
   app.use(express.json());
 
   app.post("/api/generate", async (req, res) => {
