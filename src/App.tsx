@@ -22,55 +22,62 @@ import { Language } from "./types";
 type View = "app" | "pricing" | "privacy" | "terms";
 
 async function generatePromptResponse(systemInstruction: string, contents: string) {
-  const localResponse = await fetch("/api/generate", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      systemInstruction,
-      contents,
-    }),
-  }).catch(() => null);
+  const isStaticHost =
+    typeof window !== "undefined" &&
+    (window.location.hostname.endsWith("github.io") ||
+      window.location.hostname.endsWith("pages.dev") ||
+      window.location.hostname.endsWith("netlify.app"));
 
-  if (localResponse?.ok) {
-    return localResponse.json();
+  if (!isStaticHost) {
+    const localResponse = await fetch("/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        systemInstruction,
+        contents,
+      }),
+    }).catch(() => null);
+
+    if (localResponse?.ok) {
+      return localResponse.json();
+    }
+
+    const shouldFallback =
+      !localResponse ||
+      localResponse.status === 404 ||
+      localResponse.status === 405 ||
+      localResponse.headers.get("content-type")?.includes("text/html");
+
+    if (!shouldFallback) {
+      const payload = await localResponse.json().catch(() => null);
+      throw new Error(payload?.error || "Failed to generate prompt. Please try again.");
+    }
   }
 
-  if (localResponse && localResponse.status !== 404) {
-    const payload = await localResponse.json().catch(() => null);
-    throw new Error(payload?.error || "Failed to generate prompt. Please try again.");
-  }
-
-  const publicResponse = await fetch("https://text.pollinations.ai/openai", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "openai",
-      messages: [
-        { role: "system", content: systemInstruction },
-        { role: "user", content: contents },
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.7,
-    }),
+  const params = new URLSearchParams({
+    model: "openai",
+    json: "true",
+    private: "true",
+    temperature: "0.7",
+    system: systemInstruction,
   });
+  const publicResponse = await fetch(
+    `https://text.pollinations.ai/${encodeURIComponent(contents)}?${params.toString()}`,
+  );
 
-  const payload = await publicResponse.json().catch(() => null);
+  const text = await publicResponse.text().catch(() => "");
 
   if (!publicResponse.ok) {
     const message =
       publicResponse.status === 429
         ? "The free public AI API is busy or rate-limited right now. Please wait a moment and try again."
-        : payload?.error || "Failed to generate prompt. Please try again.";
+        : text || "Failed to generate prompt. Please try again.";
     throw new Error(message);
   }
 
-  const text = payload?.choices?.[0]?.message?.content;
-
-  if (typeof text !== "string" || !text.trim()) {
+  if (!text.trim()) {
     throw new Error("The AI provider returned an empty response.");
   }
 
