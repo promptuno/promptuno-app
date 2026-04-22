@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
     <meta name="theme-color" content="#A855F7" />
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="%BASE_URL%manifest.json" />
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/6124/6124995.png" />
     <title>Promptuno — Master the Forge</title>
   </head>
@@ -14,7 +14,7 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').then(reg => {
+          navigator.serviceWorker.register('%BASE_URL%sw.js').then(reg => {
             console.log('SW registered:', reg);
           }).catch(err => {
             console.log('SW reg error:', err);
@@ -24,4 +24,3 @@
     </script>
   </body>
 </html>
-

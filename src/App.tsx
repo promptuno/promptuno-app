@@ -21,6 +21,62 @@ import { Language } from "./types";
 
 type View = "app" | "pricing" | "privacy" | "terms";
 
+async function generatePromptResponse(systemInstruction: string, contents: string) {
+  const localResponse = await fetch("/api/generate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      systemInstruction,
+      contents,
+    }),
+  }).catch(() => null);
+
+  if (localResponse?.ok) {
+    return localResponse.json();
+  }
+
+  if (localResponse && localResponse.status !== 404) {
+    const payload = await localResponse.json().catch(() => null);
+    throw new Error(payload?.error || "Failed to generate prompt. Please try again.");
+  }
+
+  const publicResponse = await fetch("https://text.pollinations.ai/openai", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "openai",
+      messages: [
+        { role: "system", content: systemInstruction },
+        { role: "user", content: contents },
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+    }),
+  });
+
+  const payload = await publicResponse.json().catch(() => null);
+
+  if (!publicResponse.ok) {
+    const message =
+      publicResponse.status === 429
+        ? "The free public AI API is busy or rate-limited right now. Please wait a moment and try again."
+        : payload?.error || "Failed to generate prompt. Please try again.";
+    throw new Error(message);
+  }
+
+  const text = payload?.choices?.[0]?.message?.content;
+
+  if (typeof text !== "string" || !text.trim()) {
+    throw new Error("The AI provider returned an empty response.");
+  }
+
+  return { text };
+}
+
 export default function App() {
   const [mode, setMode] = useState<AppMode>("Forge");
   const [platform, setPlatform] = useState<Platform>("ChatGPT");
@@ -159,24 +215,10 @@ JSON structure:
 }
 `;
 
-      const aiPromise = fetch("/api/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          systemInstruction,
-          contents: `User said: "${inputToUse}". Forge the best ${mode === "Code" ? "coding system" : "prompt"} for ${platform}.`,
-        }),
-      }).then(async (response) => {
-        const payload = await response.json().catch(() => null);
-
-        if (!response.ok) {
-          throw new Error(payload?.error || "Failed to generate prompt. Please try again.");
-        }
-
-        return payload;
-      });
+      const aiPromise = generatePromptResponse(
+        systemInstruction,
+        `User said: "${inputToUse}". Forge the best ${mode === "Code" ? "coding system" : "prompt"} for ${platform}.`,
+      );
 
       // 2. Short 1s buffer for the "Forging" button state to feel reactive
       await new Promise(resolve => setTimeout(resolve, 800));
