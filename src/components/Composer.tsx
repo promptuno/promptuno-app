@@ -47,6 +47,13 @@ export const Composer: React.FC<ComposerProps> = ({
   const currentPlatforms = mode === "Code" 
     ? CODE_PLATFORMS 
     : (mode === "Image" ? IMAGE_PLATFORMS : PLATFORMS);
+  const createForLabel = lang === "en"
+    ? mode === "Code"
+      ? "Create an architecture for"
+      : mode === "Image"
+        ? "Create an image prompt for"
+        : "Create a prompt for"
+    : t.labels.CreateFor.replace('{type}', mode === "Code" ? t.labels.Architecture : (mode === "Image" ? t.labels.ArtVibe : t.labels.Prompt));
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -248,7 +255,7 @@ export const Composer: React.FC<ComposerProps> = ({
             "text-[11px] md:text-[14px] font-black uppercase tracking-[0.16em] md:tracking-[0.2em] text-center sm:text-left",
             mode === "Code" ? "text-green-500/50" : (mode === "Image" ? "text-purple-400" : "text-neutral-400 dark:text-neutral-600")
           )}>
-            {t.labels.CreateFor.replace('{type}', mode === "Code" ? t.labels.Architecture : (mode === "Image" ? t.labels.ArtVibe : t.labels.Prompt))}
+            {createForLabel}
           </span>
           <div className={cn(
             "flex items-center gap-1 p-1 rounded-2xl border overflow-x-auto no-scrollbar w-full snap-x",
