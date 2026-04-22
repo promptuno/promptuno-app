@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { ArrowUp, Mic, MicOff, Image as ImageIcon, Sparkles, Rocket } from "lucide-react";
+import { ArrowUp, Mic, MicOff, Image as ImageIcon, Rocket } from "lucide-react";
 import { cn } from "../lib/utils";
 import { AppMode, Platform } from "../types";
 import { PLATFORMS, CODE_PLATFORMS, IMAGE_PLATFORMS } from "../constants";
@@ -41,6 +41,7 @@ export const Composer: React.FC<ComposerProps> = ({
   const [isListening, setIsListening] = useState(false);
   const [isAttached, setIsAttached] = useState(false);
   const [isLimitDismissed, setIsLimitDismissed] = useState(false);
+  const [placeholderText, setPlaceholderText] = useState("");
   const recognitionRef = useRef<any>(null);
 
   const currentPlatforms = mode === "Code" 
@@ -53,6 +54,66 @@ export const Composer: React.FC<ComposerProps> = ({
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   }, [value]);
+
+  useEffect(() => {
+    textareaRef.current?.focus({ preventScroll: true });
+  }, [mode, platform]);
+
+  useEffect(() => {
+    const examples =
+      mode === "Code"
+        ? [
+            "Build a SaaS dashboard with auth, Stripe, and clean database models...",
+            "Refactor this app into a faster, mobile-first product...",
+            "Create an agent prompt that edits files safely and runs tests...",
+          ]
+        : mode === "Image"
+          ? [
+              "Create a cinematic image prompt for a luxury perfume campaign...",
+              "Turn my product idea into a Midjourney-ready visual prompt...",
+              "Describe a realistic hero image with lighting, lens, and composition...",
+            ]
+          : [
+              `Write a stronger prompt for ${platform} to launch my startup...`,
+              `Turn my rough idea into a detailed ${platform} prompt...`,
+              "Create a prompt that gives step-by-step, premium answers...",
+            ];
+
+    let exampleIndex = 0;
+    let charIndex = 0;
+    let deleting = false;
+    let timeout: number;
+
+    const tick = () => {
+      const sample = examples[exampleIndex];
+      setPlaceholderText(sample.slice(0, charIndex));
+
+      if (!deleting && charIndex < sample.length) {
+        charIndex += 1;
+        timeout = window.setTimeout(tick, 34);
+        return;
+      }
+
+      if (!deleting && charIndex === sample.length) {
+        deleting = true;
+        timeout = window.setTimeout(tick, 1400);
+        return;
+      }
+
+      if (deleting && charIndex > 0) {
+        charIndex -= 1;
+        timeout = window.setTimeout(tick, 16);
+        return;
+      }
+
+      deleting = false;
+      exampleIndex = (exampleIndex + 1) % examples.length;
+      timeout = window.setTimeout(tick, 250);
+    };
+
+    tick();
+    return () => window.clearTimeout(timeout);
+  }, [mode, platform]);
 
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -182,15 +243,15 @@ export const Composer: React.FC<ComposerProps> = ({
           </div>
         )}
 
-        <div className={cn("flex flex-wrap items-center gap-3 mb-6", mode === "Code" && "mt-4")}>
+        <div className={cn("flex flex-col gap-3 mb-5 md:mb-6", mode === "Code" && "mt-4")}>
           <span className={cn(
-            "text-[14px] font-black uppercase tracking-[0.2em]",
+            "text-[11px] md:text-[14px] font-black uppercase tracking-[0.16em] md:tracking-[0.2em] text-center sm:text-left",
             mode === "Code" ? "text-green-500/50" : (mode === "Image" ? "text-purple-400" : "text-neutral-400 dark:text-neutral-600")
           )}>
             {t.labels.CreateFor.replace('{type}', mode === "Code" ? t.labels.Architecture : (mode === "Image" ? t.labels.ArtVibe : t.labels.Prompt))}
           </span>
           <div className={cn(
-            "flex items-center gap-1 p-1 rounded-2xl border",
+            "flex items-center gap-1 p-1 rounded-2xl border overflow-x-auto no-scrollbar w-full snap-x",
             mode === "Code" ? "bg-green-500/5 border-green-500/20" : (mode === "Image" ? "bg-purple-500/5 border-purple-500/20" : "bg-neutral-100/50 dark:bg-white/5 border-neutral-200/50 dark:border-white/5")
           )}>
             {currentPlatforms.map((p) => (
@@ -199,7 +260,7 @@ export const Composer: React.FC<ComposerProps> = ({
                 type="button"
                 onClick={() => onPlatformChange(p as Platform)}
                 className={cn(
-                  "relative px-4 py-1.5 text-[11px] font-bold rounded-xl transition-all duration-300",
+                  "relative shrink-0 snap-center px-4 py-2 text-[11px] font-bold rounded-xl transition-all duration-300",
                   platform === p
                     ? (mode === "Code" ? "text-green-400" : (mode === "Image" ? "text-purple-600 dark:text-purple-300" : "text-black dark:text-white"))
                     : (mode === "Code" ? "text-green-900/50 hover:text-green-700" : (mode === "Image" ? "text-purple-900/40 hover:text-purple-600" : "text-neutral-400 hover:text-neutral-600 dark:text-neutral-600 dark:hover:text-neutral-400"))
@@ -221,7 +282,7 @@ export const Composer: React.FC<ComposerProps> = ({
           </div>
         </div>
 
-        <div className="flex items-start gap-4">
+        <div className="flex items-start gap-3 md:gap-4">
           {mode === "Code" && <span className="text-green-500 mt-1">{">"}</span>}
           {mode === "Image" && <Palette className="w-6 h-6 text-purple-500 mt-1" />}
           <textarea
@@ -229,13 +290,13 @@ export const Composer: React.FC<ComposerProps> = ({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={
+            placeholder={placeholderText || (
               mode === "Code" 
                 ? t.placeholders.Code 
                 : (mode === "Image" ? t.placeholders.Image : t.placeholders.Forge.replace('{platform}', platform))
-            }
+            )}
             className={cn(
-              "flex-1 bg-transparent border-none focus:ring-0 resize-none text-base md:text-[22px] font-medium leading-relaxed p-0 min-h-[140px] max-h-[500px]",
+              "flex-1 bg-transparent border-none focus:ring-0 resize-none text-[17px] md:text-[22px] font-medium leading-relaxed p-0 min-h-[150px] md:min-h-[140px] max-h-[500px]",
               mode === "Code" 
                 ? "text-green-400 placeholder-green-900 font-mono" 
                 : (mode === "Image" 
@@ -260,10 +321,10 @@ export const Composer: React.FC<ComposerProps> = ({
         )}
 
         <div className={cn(
-          "flex flex-col sm:flex-row items-center justify-between mt-6 md:mt-8 pt-4 md:pt-6 border-t gap-4",
+          "flex flex-col sm:flex-row items-stretch sm:items-center justify-between mt-6 md:mt-8 pt-4 md:pt-6 border-t gap-4",
           mode === "Code" ? "border-green-500/20" : (mode === "Image" ? "border-purple-500/20" : "border-neutral-100/50 dark:border-white/5")
         )}>
-          <div className="flex items-center gap-1 md:gap-3 w-full sm:w-auto justify-center sm:justify-start">
+          <div className="flex items-center gap-2 md:gap-3 w-full sm:w-auto justify-center sm:justify-start order-2 sm:order-1">
             <button
               type="button"
               onClick={handleFileClick}
@@ -310,7 +371,7 @@ export const Composer: React.FC<ComposerProps> = ({
             type="submit"
             disabled={disabled || !value.trim() || isLimitReached}
             className={cn(
-              "group relative w-full sm:w-auto px-10 py-4.5 rounded-[24px] text-[15px] font-black uppercase tracking-[0.15em] transition-all duration-500 overflow-hidden shadow-2xl",
+              "group relative w-full sm:w-auto px-8 py-4 rounded-[20px] md:rounded-[24px] text-[13px] md:text-[15px] font-black uppercase tracking-[0.12em] md:tracking-[0.15em] transition-all duration-500 overflow-hidden shadow-2xl flex items-center justify-center order-1 sm:order-2",
               mode === "Code" 
                 ? (value.trim() && !disabled && !isLimitReached ? "bg-green-500 text-black hover:bg-green-400" : "bg-green-900/20 text-green-900")
                 : (mode === "Image"

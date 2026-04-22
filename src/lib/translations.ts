@@ -5,7 +5,7 @@ export const translations = {
     modes: {
       Forge: "Forge",
       Code: "Vibe Coding",
-      Image: "Image Art",
+      Image: "Image Prompt",
     },
     placeholders: {
       Forge: "Describe your request for {platform}...",
@@ -15,7 +15,7 @@ export const translations = {
     buttons: {
       Forge: "Forge Prompt",
       Code: "Inject Code Vibe",
-      Image: "Visualize Art",
+      Image: "Create Image Prompt",
       NewGeneration: "New Generation",
       Upgrade: "Upgrade to Pro",
       MaybeLater: "Maybe Later",
@@ -24,7 +24,7 @@ export const translations = {
     labels: {
       CreateFor: "Create an {type} for",
       Architecture: "architecture",
-      ArtVibe: "art vibe",
+      ArtVibe: "image prompt",
       Prompt: "prompt",
       WaitMessage: "Please wait a moment",
       Engineering: "Engineering {platform} Data",

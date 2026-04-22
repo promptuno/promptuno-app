@@ -10,6 +10,7 @@ interface AnalysisLoaderProps {
   platform: string;
   mode?: "Forge" | "Code" | "Image";
   lang: Language;
+  request?: string;
 }
 
 const FlowingText = ({ text, delay = 0, className }: { text: string; delay?: number; className?: string }) => {
@@ -36,16 +37,33 @@ const FlowingText = ({ text, delay = 0, className }: { text: string; delay?: num
   );
 };
 
-export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode = "Forge", lang }) => {
+function getKeywords(request: string) {
+  const stopWords = new Set([
+    "the", "and", "for", "with", "that", "this", "from", "into", "make", "create", "write", "please", "prompt", "want",
+    "une", "des", "les", "pour", "avec", "dans", "sur", "mon", "mes", "faire",
+  ]);
+
+  return request
+    .toLowerCase()
+    .replace(/[^a-z0-9\u00c0-\u024f\u0600-\u06ff\s-]/gi, " ")
+    .split(/\s+/)
+    .map((word) => word.trim())
+    .filter((word) => word.length > 3 && !stopWords.has(word))
+    .slice(0, 5);
+}
+
+export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode = "Forge", lang, request = "" }) => {
   const t = translations[lang];
   const [currentStep, setCurrentStep] = useState(0);
+  const keywords = getKeywords(request);
+  const keywordText = keywords.length ? keywords.join(" / ") : platform;
 
   const steps = [
-    { icon: Search, label: lang === 'en' ? "Scanning Intent" : (lang === 'fr' ? 'Analyse de l\'intention' : (lang === 'ar' ? 'مسح القصد' : (lang === 'tr' ? 'Niyet Taranıyor' : 'Сканирование намерения'))), sub: t.loading.Scanning.replace('{platform}', platform) },
-    { icon: ScanSearch, label: lang === 'en' ? "Deep Searching" : (lang === 'fr' ? 'Recherche Profonde' : (lang === 'ar' ? 'بحث عميق' : (lang === 'tr' ? 'Derin Arama' : 'Глубокий поиск'))), sub: t.loading.Architecting },
-    { icon: Database, label: lang === 'en' ? "Contextualizing" : (lang === 'fr' ? 'Contextualisation' : (lang === 'ar' ? 'السياق' : (lang === 'tr' ? 'Bağlamsallaştırma' : 'Контекстуализация'))), sub: t.loading.Optimizing },
-    { icon: Cpu, label: lang === 'en' ? "Synthesizing" : (lang === 'fr' ? 'Synthétisation' : (lang === 'ar' ? 'توليف' : (lang === 'tr' ? 'Sentezleme' : 'Синтез'))), sub: "Finalizing geometry" },
-    { icon: BrainCircuit, label: lang === 'en' ? "Finalizing" : (lang === 'fr' ? 'Finalisation' : (lang === 'ar' ? 'الانتهاء' : (lang === 'tr' ? 'Sonuçlandırma' : 'Завершение'))), sub: "Calibrating expert reasoning" },
+    { icon: Search, label: lang === 'en' ? "Reading Your Intent" : (lang === 'fr' ? 'Analyse de l\'intention' : (lang === 'ar' ? 'مسح القصد' : (lang === 'tr' ? 'Niyet Taranıyor' : 'Сканирование намерения'))), sub: `Detecting: ${keywordText}` },
+    { icon: ScanSearch, label: lang === 'en' ? "Mapping Context" : (lang === 'fr' ? 'Recherche Profonde' : (lang === 'ar' ? 'بحث عميق' : (lang === 'tr' ? 'Bağlam Eşleniyor' : 'Контекст'))), sub: t.loading.Scanning.replace('{platform}', platform) },
+    { icon: Database, label: lang === 'en' ? "Structuring Prompt" : (lang === 'fr' ? 'Structuration' : (lang === 'ar' ? 'تنظيم البرومبت' : (lang === 'tr' ? 'Prompt Yapısı' : 'Структура'))), sub: t.loading.Architecting },
+    { icon: Cpu, label: lang === 'en' ? "Sharpening Output" : (lang === 'fr' ? 'Optimisation' : (lang === 'ar' ? 'تحسين النتيجة' : (lang === 'tr' ? 'Çıktı Keskinleşiyor' : 'Оптимизация'))), sub: t.loading.Optimizing },
+    { icon: BrainCircuit, label: lang === 'en' ? "Ready Soon" : (lang === 'fr' ? 'Bientôt prêt' : (lang === 'ar' ? 'جاهز قريباً' : (lang === 'tr' ? 'Neredeyse Hazır' : 'Почти готово'))), sub: "Polishing the final answer" },
   ];
 
   useEffect(() => {
@@ -126,6 +144,29 @@ export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode =
         </div>
 
         {/* Process Steps */}
+        {keywords.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-2 mb-6 px-4">
+            {keywords.map((keyword, index) => (
+              <motion.span
+                key={keyword}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.08 }}
+                className={cn(
+                  "px-3 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-widest",
+                  mode === "Code"
+                    ? "border-green-500/20 text-green-500/70 bg-green-500/5"
+                    : mode === "Image"
+                      ? "border-purple-500/20 text-purple-500 bg-purple-500/5"
+                      : "border-neutral-200 dark:border-white/10 text-neutral-500 dark:text-neutral-400 bg-white/50 dark:bg-white/5"
+                )}
+              >
+                {keyword}
+              </motion.span>
+            ))}
+          </div>
+        )}
+
         <div className="space-y-4 md:space-y-8 px-4 md:px-12">
           {steps.map((step, i) => {
             const isActive = i === currentStep;
@@ -192,7 +233,7 @@ export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode =
           })}
         </div>
 
-        <div className="mt-20 flex flex-col items-center gap-6">
+        <div className="mt-12 md:mt-20 flex flex-col items-center gap-5">
           <div className="w-full max-w-xs bg-neutral-100 dark:bg-neutral-900 h-1 rounded-full overflow-hidden">
             <motion.div 
               initial={{ width: 0 }}
@@ -212,7 +253,7 @@ export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode =
               mode === "Code" ? "text-green-500 font-mono" : "text-neutral-400"
             )}
           >
-            {t.labels.Forging}
+            {currentStep >= steps.length - 1 ? "Almost ready" : t.labels.Forging}
           </motion.div>
         </div>
       </div>

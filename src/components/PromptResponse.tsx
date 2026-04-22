@@ -37,6 +37,11 @@ export const PromptResponse: React.FC<PromptResponseProps> = ({
 
   const isImage = mode === "Image";
   const isCode = mode === "Code";
+  const responseLabel = isCode
+    ? (lang === 'fr' ? 'Résultat Système Compilé' : (lang === 'ar' ? 'نتيجة النظام المترجمة' : (lang === 'tr' ? 'Derlenmiş Sistem Sonucu' : (lang === 'ru' ? 'Скомпилированный результат системы' : 'Compiled System Result'))))
+    : isImage
+      ? (lang === 'fr' ? 'Prompt Image Prêt' : (lang === 'ar' ? 'مطالبة الصورة جاهزة' : (lang === 'tr' ? 'Görsel Prompt Hazır' : (lang === 'ru' ? 'Промпт изображения готов' : 'Image Prompt Ready'))))
+      : (lang === 'fr' ? 'Prompt Prêt' : (lang === 'ar' ? 'المطالبة جاهزة' : (lang === 'tr' ? 'Prompt Hazır' : (lang === 'ru' ? 'Промпт готов' : 'Prompt Ready'))));
 
   return (
     <motion.div
@@ -95,7 +100,7 @@ export const PromptResponse: React.FC<PromptResponseProps> = ({
                   "text-[11px] font-black uppercase tracking-[0.2em]",
                   isCode ? "text-green-500/50" : (isImage ? "text-purple-500/60" : "text-neutral-400 dark:text-neutral-500")
                 )}>
-                  {isCode ? (lang === 'fr' ? 'Résultat Système Compilé' : (lang === 'ar' ? 'نتيجة النظام المترجمة' : (lang === 'tr' ? 'Derlenmiş Sistem Sonucu' : (lang === 'ru' ? 'Скомпилированный результат системы' : 'Compiled System Result')))) : (isImage ? (lang === 'fr' ? 'Résultat Géométrie Art' : (lang === 'ar' ? 'نتيجة هندسة الفن' : (lang === 'tr' ? 'Sanat Geometrisi Sonucu' : (lang === 'ru' ? 'Результат арт-геометрии' : 'Art Geometry Result')))) : t.labels.WaitMessage)}
+                  {responseLabel}
                 </span>
               </div>
               <button

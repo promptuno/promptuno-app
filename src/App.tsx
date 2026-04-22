@@ -186,6 +186,7 @@ export default function App() {
   const [lang, setLang] = useState<Language>("en");
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallNotice, setShowInstallNotice] = useState(false);
+  const [activeRequest, setActiveRequest] = useState("");
   
   const t = translations[lang];
 
@@ -246,6 +247,7 @@ export default function App() {
     }
 
     setIsGenerating(true);
+    setActiveRequest(inputToUse);
     setCurrentResponse(null);
     setError(null);
 
@@ -341,7 +343,7 @@ JSON structure:
       
       // 5. Ensure the animation runs for at least a minimum time to feel premium
       const elapsed = Date.now() - animationStart;
-      const minAnimationTime = 4000; // 4 seconds total of big animation
+      const minAnimationTime = 1600;
       const waitTime = Math.max(0, minAnimationTime - elapsed);
       
       await new Promise(resolve => setTimeout(resolve, waitTime));
@@ -464,6 +466,18 @@ JSON structure:
           </div>
           
           <LanguageSwitcher current={lang} onSelect={setLang} mode={mode} />
+          <button
+            type="button"
+            onClick={() => setView("pricing")}
+            className={cn(
+              "hidden min-[380px]:inline-flex px-3 py-2 rounded-full border text-[9px] font-black uppercase tracking-widest transition-all",
+              mode === "Code"
+                ? "border-green-500/20 text-green-500/60 hover:text-green-400 hover:border-green-500/40"
+                : "border-neutral-200 dark:border-white/10 text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
+            )}
+          >
+            Upgrade
+          </button>
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
         </div>
       </header>
@@ -552,7 +566,7 @@ JSON structure:
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                   >
-                    <AnalysisLoader platform={platform} mode={mode} lang={lang} />
+                    <AnalysisLoader platform={platform} mode={mode} lang={lang} request={activeRequest} />
                   </motion.div>
                 )}
               </AnimatePresence>

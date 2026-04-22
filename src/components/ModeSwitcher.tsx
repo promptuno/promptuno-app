@@ -10,11 +10,11 @@ interface ModeSwitcherProps {
 
 export const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ mode, onChange }) => {
   return (
-    <div className="flex justify-center mb-12">
-      <div className="bg-neutral-100/50 dark:bg-white/5 backdrop-blur-3xl p-1.5 rounded-[24px] border border-neutral-200/50 dark:border-white/10 flex items-center gap-1 shadow-2xl">
+    <div className="flex justify-center mb-8 md:mb-12 px-1">
+      <div className="w-full max-w-xl bg-neutral-100/50 dark:bg-white/5 backdrop-blur-3xl p-1 rounded-[20px] md:rounded-[24px] border border-neutral-200/50 dark:border-white/10 grid grid-cols-3 gap-1 shadow-2xl">
         <button
           onClick={() => onChange("Forge")}
-          className={`relative px-4 sm:px-7 py-3 rounded-2xl text-[11px] sm:text-[12px] font-black tracking-widest uppercase transition-all duration-300 flex items-center gap-2 ${
+          className={`relative px-2 sm:px-7 py-3 rounded-2xl text-[10px] sm:text-[12px] font-black tracking-[0.08em] sm:tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 ${
             mode === "Forge" 
               ? "text-black dark:text-white" 
               : "text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
@@ -27,15 +27,15 @@ export const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ mode, onChange }) =>
               transition={{ type: "spring", bounce: 0.15, duration: 0.6 }}
             />
           )}
-          <span className="relative z-10 flex items-center gap-2.5">
-            <Sparkles className="w-4 h-4" />
+          <span className="relative z-10 flex items-center gap-1.5 sm:gap-2.5 whitespace-nowrap">
+            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             Forge
           </span>
         </button>
 
         <button
           onClick={() => onChange("Code")}
-          className={`relative px-4 sm:px-7 py-3 rounded-2xl text-[11px] sm:text-[12px] font-black tracking-widest uppercase transition-all duration-300 flex items-center gap-2 ${
+          className={`relative px-2 sm:px-7 py-3 rounded-2xl text-[10px] sm:text-[12px] font-black tracking-[0.08em] sm:tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 ${
             mode === "Code" 
               ? "text-green-600 dark:text-green-400" 
               : "text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
@@ -48,15 +48,15 @@ export const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ mode, onChange }) =>
               transition={{ type: "spring", bounce: 0.15, duration: 0.6 }}
             />
           )}
-          <span className="relative z-10 flex items-center gap-2.5">
-            <Terminal className="w-4 h-4" />
-            Vibe Coding
+          <span className="relative z-10 flex items-center gap-1.5 sm:gap-2.5 whitespace-nowrap">
+            <Terminal className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden min-[390px]:inline">Vibe</span> Code
           </span>
         </button>
 
         <button
           onClick={() => onChange("Image")}
-          className={`relative px-4 sm:px-7 py-3 rounded-2xl text-[11px] sm:text-[12px] font-black tracking-widest uppercase transition-all duration-300 flex items-center gap-2 ${
+          className={`relative px-2 sm:px-7 py-3 rounded-2xl text-[10px] sm:text-[12px] font-black tracking-[0.08em] sm:tracking-widest uppercase transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 ${
             mode === "Image" 
               ? "text-purple-600 dark:text-purple-400" 
               : "text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
@@ -69,9 +69,9 @@ export const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ mode, onChange }) =>
               transition={{ type: "spring", bounce: 0.15, duration: 0.6 }}
             />
           )}
-          <span className="relative z-10 flex items-center gap-2.5">
-            <Palette className="w-4 h-4" />
-            Image Art
+          <span className="relative z-10 flex items-center gap-1.5 sm:gap-2.5 whitespace-nowrap">
+            <Palette className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            Image
           </span>
         </button>
       </div>
