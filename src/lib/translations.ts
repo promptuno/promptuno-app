@@ -22,7 +22,7 @@ export const translations = {
       Unlock: "Upgrade to Unlock",
     },
     labels: {
-      CreateFor: "Create an {type} for",
+      CreateFor: "Create a {type} for",
       Architecture: "architecture",
       ArtVibe: "image prompt",
       Prompt: "prompt",
@@ -42,7 +42,7 @@ export const translations = {
       CodeReforge: "Re-execute Architecture",
       ImageConcise: "Clean & Minimal",
       ImageTechnician: "Boost Detail & Specs",
-      ImageReforge: "Re-Forge Art",
+      ImageReforge: "Re-Forge Image Prompt",
     },
     loading: {
       Scanning: "Scanning {platform} capabilities...",
@@ -54,7 +54,7 @@ export const translations = {
     modes: {
       Forge: "Forge",
       Code: "Vibe Coding",
-      Image: "Art Image",
+      Image: "Prompt Image",
     },
     placeholders: {
       Forge: "Décrivez votre demande pour {platform}...",
@@ -64,7 +64,7 @@ export const translations = {
     buttons: {
       Forge: "Forger le Prompt",
       Code: "Injecter le Vibe Code",
-      Image: "Visualiser l'Art",
+      Image: "Créer Prompt Image",
       NewGeneration: "Nouvelle Génération",
       Upgrade: "Passer à la version Pro",
       MaybeLater: "Peut-être plus tard",
@@ -73,7 +73,7 @@ export const translations = {
     labels: {
       CreateFor: "Créer un {type} pour",
       Architecture: "architecture",
-      ArtVibe: "vibe artistique",
+      ArtVibe: "prompt image",
       Prompt: "prompt",
       WaitMessage: "Veuillez patienter un instant",
       Engineering: "Ingénierie des données {platform}",
@@ -91,7 +91,7 @@ export const translations = {
       CodeReforge: "Ré-exécuter l'Architecture",
       ImageConcise: "Propre & Minimal",
       ImageTechnician: "Booster les Détails & Specs",
-      ImageReforge: "Re-Forger l'Art",
+      ImageReforge: "Re-Forger le Prompt Image",
     },
     loading: {
       Scanning: "Analyse des capacités de {platform}...",
@@ -103,7 +103,7 @@ export const translations = {
     modes: {
       Forge: "فورج",
       Code: "فايب كودينج",
-      Image: "فن الصور",
+      Image: "مطالبة صورة",
     },
     placeholders: {
       Forge: "صف طلبك لـ {platform}...",
@@ -113,7 +113,7 @@ export const translations = {
     buttons: {
       Forge: "فورج البرومبت",
       Code: "حقن فايب الكود",
-      Image: "تصور الفن",
+      Image: "إنشاء مطالبة صورة",
       NewGeneration: "جيل جديد",
       Upgrade: "الترقية إلى برو",
       MaybeLater: "ربما لاحقاً",
@@ -122,7 +122,7 @@ export const translations = {
     labels: {
       CreateFor: "إنشاء {type} لـ",
       Architecture: "بنية",
-      ArtVibe: "جو فني",
+      ArtVibe: "مطالبة صورة",
       Prompt: "برومبت",
       WaitMessage: "يرجى الانتظار لحظة",
       Engineering: "هندسة بيانات {platform}",
@@ -140,7 +140,7 @@ export const translations = {
       CodeReforge: "إعادة تنفيذ البنية",
       ImageConcise: "نظيف وبسيط",
       ImageTechnician: "تعزيز التفاصيل والمواصفات",
-      ImageReforge: "إعادة فورج الفن",
+      ImageReforge: "إعادة فورج مطالبة الصورة",
     },
     loading: {
       Scanning: "مسح إمكانيات {platform}...",
@@ -152,7 +152,7 @@ export const translations = {
     modes: {
       Forge: "Forge",
       Code: "Vibe Kodlama",
-      Image: "Görüntü Sanatı",
+      Image: "Görsel Prompt",
     },
     placeholders: {
       Forge: "{platform} için isteğinizi açıklayın...",
@@ -162,7 +162,7 @@ export const translations = {
     buttons: {
       Forge: "Prompt Oluştur",
       Code: "Kod Vibe'ı Enjekte Et",
-      Image: "Sanatı Görselleştir",
+      Image: "Görsel Prompt Oluştur",
       NewGeneration: "Yeni Nesil",
       Upgrade: "Pro'ya Yükselt",
       MaybeLater: "Belki Sonra",
@@ -171,7 +171,7 @@ export const translations = {
     labels: {
       CreateFor: "Şunun için {type} oluştur:",
       Architecture: "mimari",
-      ArtVibe: "sanatsal vibe",
+      ArtVibe: "görsel prompt",
       Prompt: "prompt",
       WaitMessage: "Lütfen bir an bekleyin",
       Engineering: "{platform} Veri Mühendisliği",
@@ -189,7 +189,7 @@ export const translations = {
       CodeReforge: "Mimariyi Yeniden Çalıştır",
       ImageConcise: "Temiz & Minimal",
       ImageTechnician: "Detay ve Özellikleri Artır",
-      ImageReforge: "Sanatı Yeniden Oluştur",
+      ImageReforge: "Görsel Promptu Yeniden Oluştur",
     },
     loading: {
       Scanning: "{platform} yetenekleri taranıyor...",
@@ -201,7 +201,7 @@ export const translations = {
     modes: {
       Forge: "Кузня",
       Code: "Вайб-кодинг",
-      Image: "Арт-дизайн",
+      Image: "Промпт изображения",
     },
     placeholders: {
       Forge: "Опишите ваш запрос для {platform}...",
@@ -211,7 +211,7 @@ export const translations = {
     buttons: {
       Forge: "Создать Промпт",
       Code: "Внедрить Код-Вайб",
-      Image: "Визуализировать Арт",
+      Image: "Создать промпт изображения",
       NewGeneration: "Новая Генерация",
       Upgrade: "Перейти на Pro",
       MaybeLater: "Возможно позже",
@@ -220,7 +220,7 @@ export const translations = {
     labels: {
       CreateFor: "Создать {type} для",
       Architecture: "архитектуры",
-      ArtVibe: "арт-вайба",
+      ArtVibe: "промпта изображения",
       Prompt: "промпта",
       WaitMessage: "Пожалуйста, подождите немного",
       Engineering: "Инженерия данных {platform}",
@@ -238,7 +238,7 @@ export const translations = {
       CodeReforge: "Перезапустить Архитектуру",
       ImageConcise: "Чисто и Минималистично",
       ImageTechnician: "Добавить Спецификации",
-      ImageReforge: "Пересоздать Арт",
+      ImageReforge: "Пересоздать промпт изображения",
     },
     loading: {
       Scanning: "Сканирование возможностей {platform}...",
