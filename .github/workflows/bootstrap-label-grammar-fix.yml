@@ -20,25 +20,29 @@ jobs:
           from pathlib import Path
           path = Path('src/components/Composer.tsx')
           text = path.read_text()
-          old = '''  const currentPlatforms = mode === "Code" 
-    ? CODE_PLATFORMS 
-    : (mode === "Image" ? IMAGE_PLATFORMS : PLATFORMS);
-'''
-          new = '''  const currentPlatforms = mode === "Code" 
-    ? CODE_PLATFORMS 
-    : (mode === "Image" ? IMAGE_PLATFORMS : PLATFORMS);
-  const createForLabel = lang === "en"
-    ? mode === "Code"
-      ? "Create an architecture for"
-      : mode === "Image"
-        ? "Create an image prompt for"
-        : "Create a prompt for"
-    : t.labels.CreateFor.replace('{type}', mode === "Code" ? t.labels.Architecture : (mode === "Image" ? t.labels.ArtVibe : t.labels.Prompt));
-'''
+          old = "\n".join([
+              '  const currentPlatforms = mode === "Code" ',
+              '    ? CODE_PLATFORMS ',
+              '    : (mode === "Image" ? IMAGE_PLATFORMS : PLATFORMS);',
+              '',
+          ])
+          new = "\n".join([
+              '  const currentPlatforms = mode === "Code" ',
+              '    ? CODE_PLATFORMS ',
+              '    : (mode === "Image" ? IMAGE_PLATFORMS : PLATFORMS);',
+              '  const createForLabel = lang === "en"',
+              '    ? mode === "Code"',
+              '      ? "Create an architecture for"',
+              '      : mode === "Image"',
+              '        ? "Create an image prompt for"',
+              '        : "Create a prompt for"',
+              '    : t.labels.CreateFor.replace(\'{type}\', mode === "Code" ? t.labels.Architecture : (mode === "Image" ? t.labels.ArtVibe : t.labels.Prompt));',
+              '',
+          ])
           if old not in text:
               raise SystemExit('Could not find currentPlatforms block')
           text = text.replace(old, new, 1)
-          old_expr = '''            {t.labels.CreateFor.replace('{type}', mode === "Code" ? t.labels.Architecture : (mode === "Image" ? t.labels.ArtVibe : t.labels.Prompt))}'''
+          old_expr = '            {t.labels.CreateFor.replace(\'{type}\', mode === "Code" ? t.labels.Architecture : (mode === "Image" ? t.labels.ArtVibe : t.labels.Prompt))}'
           if old_expr not in text:
               raise SystemExit('Could not find label expression')
           text = text.replace(old_expr, '            {createForLabel}', 1)
