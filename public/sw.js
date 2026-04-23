@@ -1,4 +1,4 @@
-const CACHE_NAME = 'promptuno-v2';
+const CACHE_NAME = 'promptuno-v3';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

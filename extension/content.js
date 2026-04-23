@@ -56,7 +56,7 @@ function showInlineButtonForSelection() {
   inlineButton = document.createElement("button");
   inlineButton.className = "promptuno-inline-button";
   inlineButton.type = "button";
-  inlineButton.textContent = "Improve";
+  inlineButton.textContent = "Promptuno";
   inlineButton.style.top = `${window.scrollY + rect.bottom + 8}px`;
   inlineButton.style.left = `${window.scrollX + rect.left}px`;
   inlineButton.addEventListener("click", () => improveText(window.getSelection()?.toString() || ""));
@@ -70,7 +70,7 @@ async function improveText(text) {
 
   const response = await chrome.runtime.sendMessage({
     type: "PROMPTUNO_GENERATE",
-    action: "improve",
+    action: "prompt",
     platform: detectPlatform(),
     input,
     context: location.hostname
@@ -86,7 +86,7 @@ async function improveText(text) {
     return;
   }
 
-  renderPanel("Improved prompt", response.result.note || "Ready to insert.", response.result.output);
+  renderPanel("Promptuno result", response.result.note || "Ready to insert.", response.result.output);
 }
 
 function renderPanel(title, note, output) {
@@ -120,7 +120,7 @@ function renderPaywall() {
   panel.style.left = `${Math.max(12, window.scrollX + window.innerWidth - 380)}px`;
   panel.innerHTML = `
     <h3>You've reached your free prompt limit.</h3>
-    <p>Upgrade to Promptuno Pro to keep generating without interruption.</p>
+    <p>Upgrade to Promptuno Pro to keep creating prompts and polished writing without interruption.</p>
     <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
       <input type="hidden" name="cmd" value="_xclick" />
       <input type="hidden" name="business" value="AFI5@OUTLOOK.COM" />

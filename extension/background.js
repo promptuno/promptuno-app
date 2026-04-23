@@ -15,7 +15,7 @@ const MODEL_GUIDANCE = {
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "promptuno-improve-selection",
-    title: "Improve with Promptuno",
+    title: "Open Promptuno for selected text",
     contexts: ["selection", "editable"]
   });
 });
@@ -75,7 +75,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       await incrementUsage();
       await appendList(HISTORY_KEY, {
         id: crypto.randomUUID(),
-        action: message.action || "improve",
+        action: message.action || "prompt",
         platform: message.platform || "ChatGPT",
         input: message.input || "",
         output: result.output,
@@ -118,18 +118,16 @@ async function appendList(key, item) {
   await chrome.storage.local.set({ [key]: [item, ...current].slice(0, 30) });
 }
 
-async function generateWithPromptuno({ action = "improve", input = "", platform = "ChatGPT", context = "" }) {
+async function generateWithPromptuno({ action = "prompt", input = "", platform = "ChatGPT", context = "" }) {
   const cleanInput = input.trim();
   if (!cleanInput) throw new Error("Write or select text first.");
 
   const modeInstruction = action === "write"
     ? "Generate polished usable text for the user's current work context. Keep it useful, direct, and ready to paste."
-    : action === "refine"
-      ? "Improve the user's rough idea into a premium AI prompt. If context is missing, infer responsibly and add a short assumptions line inside the prompt."
-      : "Transform the user's rough text into a stronger AI prompt with clear role, objective, context, constraints, and output format.";
+    : "Transform the user's rough text into a stronger AI prompt with clear role, objective, context, constraints, and output format.";
 
   const system = [
-    "You are Promptuno, a premium prompt-generation assistant.",
+    "You are Promptuno, a premium prompt and writing assistant.",
     "Do not copy another product's branding or voice.",
     "Keep the output practical, clean, direct, and useful.",
     `Optimize for ${platform}. Guidance: ${MODEL_GUIDANCE[platform] || "clear AI output"}.`,
@@ -159,7 +157,7 @@ async function generateWithPromptuno({ action = "improve", input = "", platform 
   const parsed = parseOutput(text);
   return {
     output: parsed.output || text.trim(),
-    note: parsed.note || "Improved with Promptuno."
+    note: parsed.note || (action === "write" ? "Written with Promptuno." : "Prompt generated with Promptuno.")
   };
 }
 

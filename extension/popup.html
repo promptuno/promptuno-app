@@ -13,7 +13,7 @@
           <div class="mark"></div>
           <div>
             <h1>Promptuno</h1>
-            <p>Use better prompts anywhere.</p>
+            <p>Prompt and write anywhere.</p>
           </div>
         </div>
         <div id="usagePill" class="usage-pill">5 / 5 free</div>
@@ -21,8 +21,8 @@
 
       <section id="paywall" class="paywall hidden">
         <h2>You've reached your free prompt limit.</h2>
-        <p>Upgrade to Promptuno Pro to keep generating without interruption.</p>
-        <p class="muted">Built for people who use AI seriously.</p>
+        <p>Upgrade to Promptuno Pro to keep creating prompts and polished writing without interruption.</p>
+        <p class="muted">Use Promptuno on the web and inside your browser.</p>
         <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
           <input type="hidden" name="cmd" value="_xclick" />
           <input type="hidden" name="business" value="AFI5@OUTLOOK.COM" />
@@ -37,10 +37,8 @@
 
       <section id="workspace" class="workspace">
         <div class="mode-row" role="tablist" aria-label="Promptuno mode">
-          <button class="mode active" data-mode="improve">Improve</button>
-          <button class="mode" data-mode="refine">Refine</button>
+          <button class="mode active" data-mode="prompt">Prompt</button>
           <button class="mode" data-mode="write">Write</button>
-          <button class="mode" data-mode="library">Library</button>
         </div>
 
         <div id="editorPanel">
@@ -52,14 +50,14 @@
             <button class="platform" data-platform="Copilot">Copilot</button>
           </div>
 
-          <textarea id="input" placeholder="Paste a rough prompt, email idea, reply, or work request..."></textarea>
+          <textarea id="input" placeholder="Paste a rough prompt or describe what you want the AI to do..."></textarea>
 
           <div id="refineBox" class="refine-box hidden">
             <div class="mini-title">A few details will make this stronger</div>
             <div id="questions"></div>
           </div>
 
-          <button id="generate" class="primary">Improve Prompt</button>
+          <button id="generate" class="primary">Generate Prompt</button>
           <p id="status" class="status"></p>
 
           <section id="outputWrap" class="output-wrap hidden">
@@ -87,7 +85,7 @@
 
       <footer>
         <span>Alt + Shift + P improves selected text</span>
-        <a href="https://promptuno.github.io/promptuno-app/" target="_blank">Open web app</a>
+        <a href="https://www.promptuno.chat/" target="_blank">Open web app</a>
       </footer>
     </main>
     <script src="popup.js"></script>

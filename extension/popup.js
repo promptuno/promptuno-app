@@ -1,5 +1,5 @@
 const state = {
-  mode: "improve",
+  mode: "prompt",
   platform: "ChatGPT",
   output: "",
   questions: [],
@@ -68,29 +68,19 @@ async function loadActiveSelection() {
 }
 
 function renderMode() {
-  const isLibrary = state.mode === "library";
-  els.editorPanel.classList.toggle("hidden", isLibrary);
-  els.libraryPanel.classList.toggle("hidden", !isLibrary);
+  els.editorPanel.classList.remove("hidden");
+  els.libraryPanel.classList.add("hidden");
   els.refineBox.classList.add("hidden");
   els.status.textContent = "";
 
-  if (state.mode === "improve") {
-    els.input.placeholder = "Paste a rough prompt and Promptuno will make it clearer, stronger, and easier for AI to answer...";
-    els.generate.textContent = "Improve Prompt";
-  }
-
-  if (state.mode === "refine") {
-    els.input.placeholder = "Paste a vague idea. Promptuno will ask only the useful questions before improving it...";
-    els.generate.textContent = "Start Refine";
+  if (state.mode === "prompt") {
+    els.input.placeholder = "Paste a rough prompt or describe what you want the AI to do...";
+    els.generate.textContent = "Generate Prompt";
   }
 
   if (state.mode === "write") {
-    els.input.placeholder = "Describe the email, reply, follow-up, or work text you need...";
-    els.generate.textContent = "Generate Text";
-  }
-
-  if (isLibrary) {
-    renderLibrary();
+    els.input.placeholder = "Paste rough notes, an email idea, a reply, or a messy draft...";
+    els.generate.textContent = "Write Output";
   }
 }
 
@@ -107,13 +97,13 @@ async function handleGenerate() {
     return;
   }
 
-  if (state.mode === "refine" && state.questions.length === 0) {
+  if (state.mode === "prompt" && state.questions.length === 0) {
     const questions = buildQuestions(input);
     if (questions.length) {
       renderQuestions(questions);
       state.questions = questions;
       state.lastInput = input;
-      els.generate.textContent = "Generate Refined Prompt";
+      els.generate.textContent = "Generate Stronger Prompt";
       return;
     }
   }
@@ -128,7 +118,7 @@ async function handleGenerate() {
   setBusy(true);
   const response = await chrome.runtime.sendMessage({
     type: "PROMPTUNO_GENERATE",
-    action: state.mode === "write" ? "write" : state.mode === "refine" ? "refine" : "improve",
+    action: state.mode,
     platform: state.platform,
     input: finalInput,
     context: "Promptuno Chrome extension popup"
@@ -151,6 +141,7 @@ async function handleGenerate() {
   els.status.textContent = response.result.note || "Ready.";
   state.questions = [];
   els.refineBox.classList.add("hidden");
+  await renderLibrary();
   await refreshUsage();
 }
 
@@ -240,7 +231,7 @@ function showPaywall(hideWorkspace = true) {
 
 function setBusy(isBusy) {
   els.generate.disabled = isBusy;
-  els.generate.textContent = isBusy ? "Working..." : state.mode === "write" ? "Generate Text" : state.mode === "refine" ? "Generate Refined Prompt" : "Improve Prompt";
+  els.generate.textContent = isBusy ? "Working..." : state.mode === "write" ? "Write Output" : "Generate Prompt";
   els.status.textContent = isBusy ? "Promptuno is shaping the result..." : "";
 }
 

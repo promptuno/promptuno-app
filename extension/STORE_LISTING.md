@@ -2,25 +2,28 @@
 
 ## Title
 
-Promptuno - Prompt Improver
+Promptuno - Prompt and Write
 
 ## Short Description
 
-Improve AI prompts in one click and use Promptuno anywhere you write.
+Generate better AI prompts and polished writing anywhere you work.
 
 ## Long Description
 
-Promptuno is a clean, premium prompt helper for people who use AI seriously. It turns rough ideas into clearer, stronger prompts for ChatGPT, Claude, Gemini, Copilot, and everyday work contexts.
+Promptuno is a clean, premium assistant for people who work with AI seriously. It has two modes: Prompt mode for better AI prompts, and Write mode for polished usable writing.
 
-Open the extension from your browser toolbar or use the subtle inline Promptuno button near supported text fields. Improve a rough prompt, refine a vague idea with a few useful questions, or generate polished work text for emails, replies, meeting follow-ups, outreach, summaries, and AI work tasks.
+Official web app: https://www.promptuno.chat/
+
+Open the extension from your browser toolbar or use the subtle inline Promptuno button near supported text fields. Generate a better prompt for ChatGPT, Claude, Gemini, or Copilot, or turn rough notes into polished emails, replies, meeting follow-ups, outreach, summaries, and work drafts.
 
 Promptuno stays focused on prompts first. The extension is built to reduce friction, not add a noisy toolbox to your browser.
 
 ## Key Features
 
-- One-click prompt improvement for rough ideas and AI inputs.
+- Prompt mode for better prompts in major AI tools.
+- Write mode for polished emails, replies, notes, summaries, and drafts.
 - Works inside major AI tools and supported text areas.
-- Clean popup panel for prompt improvement, refine mode, and direct writing.
+- Clean popup panel for Prompt mode and Write mode.
 - Primary model focus: ChatGPT, Claude, Gemini, and Copilot.
 - Optional refine mode with short clarifying questions when useful.
 - Prompt history and saved prompts foundation.
@@ -42,7 +45,7 @@ Promptuno only processes text you choose to improve or generate. Local usage cou
 
 ## Screenshot Captions
 
-- Improve rough prompts without leaving the page.
+- Generate better prompts without leaving the page.
 - Use Promptuno from a compact premium popup.
 - Refine vague ideas with short, useful questions.
 - Generate email and work drafts when you need direct output.
@@ -50,4 +53,4 @@ Promptuno only processes text you choose to improve or generate. Local usage cou
 
 ## Value Proposition
 
-Better prompts, less friction. Promptuno helps serious AI users turn rough intent into clear instructions directly inside the browser.
+Better prompts and better writing, less friction. Promptuno helps serious AI users turn rough intent into useful output directly inside the browser.

@@ -10,14 +10,13 @@ import { ThemeToggle } from "./components/ThemeToggle";
 import { LegalView } from "./components/LegalView";
 import { cn } from "./lib/utils";
 import { motion, AnimatePresence } from "motion/react";
-import { Terminal, Download, X } from "lucide-react";
+import { Download, X } from "lucide-react";
 
 import { AnalysisLoader } from "./components/AnalysisLoader";
 import { ModeSwitcher } from "./components/ModeSwitcher";
 import { SemanticErrorModal } from "./components/SemanticErrorModal";
 import { Logo } from "./components/Logo";
 import { LanguageSwitcher } from "./components/LanguageSwitcher";
-import { translations } from "./lib/translations";
 import { Language } from "./types";
 
 type View = "app" | "pricing" | "privacy" | "terms";
@@ -71,7 +70,7 @@ function extractJsonObject(text: string) {
   return null;
 }
 
-function parseGeneratedPrompt(text: string, platform: Platform, lang: Language): GeneratedPrompt {
+function parseGeneratedPrompt(text: string, platform: Platform, lang: Language, mode: AppMode): GeneratedPrompt {
   const jsonObject = extractJsonObject(text);
 
   if (jsonObject) {
@@ -80,7 +79,7 @@ function parseGeneratedPrompt(text: string, platform: Platform, lang: Language):
       if (parsed && typeof parsed === "object" && parsed.engineeredPrompt) {
         return {
           isNonsense: Boolean(parsed.isNonsense),
-          goal: String(parsed.goal || `Prompt architecture for ${platform}`),
+          goal: String(parsed.goal || (mode === "Write" ? "Polished writing" : `Prompt architecture for ${platform}`)),
           engineeredPrompt: String(parsed.engineeredPrompt),
           explanation: String(parsed.explanation || "Generated from the user's request."),
         };
@@ -98,12 +97,10 @@ function parseGeneratedPrompt(text: string, platform: Platform, lang: Language):
 
   return {
     isNonsense: false,
-    goal: `Prompt architecture for ${platform}`,
+    goal: mode === "Write" ? "Polished writing" : `Prompt architecture for ${platform}`,
     engineeredPrompt: normalized || text,
     explanation:
-      lang === "fr"
-        ? "Le fournisseur a renvoye du texte au lieu d'un JSON strict, donc Promptuno l'a converti en reponse utilisable."
-        : "The provider returned text instead of strict JSON, so Promptuno converted it into a usable response.",
+      "The provider returned text instead of strict JSON, so Promptuno converted it into a usable response.",
   };
 }
 
@@ -183,23 +180,17 @@ function buildRefineQuestions(input: string, mode: AppMode, platform: Platform) 
   if (hasHelpfulDetail) return [];
 
   const questions =
-    mode === "Code"
+    mode === "Write"
       ? [
-          "What stack, framework, or repo context should the prompt respect?",
-          "What should the coding agent avoid changing?",
-          "How will you know the implementation is finished?",
+          "Who is this writing for?",
+          "What tone should it have?",
+          "What format should Promptuno return?",
         ]
-      : mode === "Image"
-        ? [
-            "What should be the main subject or product in the image prompt?",
-            "What mood, style, or visual reference should it follow?",
-            "Where will this image be used?",
-          ]
-        : [
-            `Who is the ${platform} answer meant for?`,
-            "What tone should the result have?",
-            "What format should the AI return?",
-          ];
+      : [
+          `Who is the ${platform} answer meant for?`,
+          "What tone should the AI use?",
+          "What format should the AI return?",
+        ];
 
   if (words.length < 10) return questions;
   if (words.length < 22) return questions.slice(0, 2);
@@ -207,7 +198,7 @@ function buildRefineQuestions(input: string, mode: AppMode, platform: Platform) 
 }
 
 export default function App() {
-  const [mode, setMode] = useState<AppMode>("Forge");
+  const [mode, setMode] = useState<AppMode>("Prompt");
   const [platform, setPlatform] = useState<Platform>("ChatGPT");
   const [inputValue, setInputValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -224,8 +215,6 @@ export default function App() {
   const [refineQuestions, setRefineQuestions] = useState<string[]>([]);
   const [refineAnswers, setRefineAnswers] = useState<string[]>([]);
   
-  const t = translations[lang];
-
   const { isLimitReached, limit, remaining, increment, reset } = useUsageLimit();
   const { theme, toggleTheme } = useTheme();
 
@@ -259,12 +248,6 @@ export default function App() {
     setDeferredPrompt(null);
     setShowInstallNotice(false);
   };
-
-  useEffect(() => {
-    if (mode === "Code") setPlatform("Claude Code");
-    else if (mode === "Image") setPlatform("Midjourney");
-    else setPlatform("ChatGPT");
-  }, [mode]);
 
   const handleGenerate = async (refinement?: string) => {
     const inputToUse = refinement || inputValue;
@@ -300,44 +283,24 @@ export default function App() {
     setRefineAnswers([]);
 
     try {
-      // 1. Kick off the AI process immediately
-      const systemInstruction = mode === "Code" 
-        ? `You are VibeCoder, the ultimate Prompt Architect for coding agents.
-Your mission is to forge deep technical source prompts that empower ${platform} to execute logic perfectly.
+      const systemInstruction = mode === "Write"
+        ? `You are Promptuno Write, a premium writing assistant inside a prompt-first product.
+Your mission is to transform rough notes, requests, and drafts into polished usable writing.
 RESPOND ENTIRELY IN ${lang.toUpperCase()} LANGUAGE.
 
 Strict Protocols:
-1. PROMPT ONLY: Never output settings, configurations, or non-prompt text. Everything must be a refined, premium prompt for the AI agent.
-2. REFINEMENT MAX: Take the user's intent and refine it to its absolute technical peak.
-3. CONTEXT PRESERVATION: You MUST explicitly consider and integrate the user's original words.
-4. Nonsense Detection: If the user input is jibberish or lacks intent, return a JSON where 'isNonsense' is true and 'explanation' is exactly "Error: I cannot generate a coding architecture for this input.".
-5. Vibe Coding style: Optimization for terminal tools and multi-file editing.
+1. WRITE DIRECTLY: Return polished content the user can copy and use immediately.
+2. CONTEXT SYNC: Preserve the user's original intent, facts, audience, and constraints.
+3. QUALITY: Make the writing clear, modern, calm, useful, and professional.
+4. Nonsense Detection: If the input is gibberish or lacks intent, return JSON with 'isNonsense' true and 'explanation' exactly "Error: I cannot generate writing for this input.".
+5. No Generic AI Suite: Stay focused on writing output, not unrelated tools.
 
 JSON structure:
 {
   "isNonsense": boolean,
-  "goal": "Persona + Logic Objective in ${lang.toUpperCase()}",
-  "engineeredPrompt": "The terminal-optimized code source prompt in ${lang.toUpperCase()}",
-  "explanation": "Compiler-level reasoning in ${lang.toUpperCase()}"
-}
-`
-        : mode === "Image"
-        ? `You are Promptuno Image Architect, an expert in high-fidelity generative art prompts for ${platform}.
-Your mission is to transform user intent into ultra-realistic or stylized art prompts.
-RESPOND ENTIRELY IN ${lang.toUpperCase()} LANGUAGE.
-
-Strict Protocols:
-1. ARTISTIC DEPTH: Use specific photographic terms, artistic styles, and technical parameters specific to ${platform}.
-2. CONTEXT SYNC: Explicitly include the user's core keywords.
-3. Nonsense Detection: If input is jibberish, return JSON with 'isNonsense' true and 'explanation' exactly "Error: I cannot generate an image prompt for this input.".
-4. Deep Visualization: The 'engineeredPrompt' should be a masterpiece of descriptive art.
-
-JSON structure:
-{
-  "isNonsense": boolean,
-  "goal": "Artistic Vision + Style in ${lang.toUpperCase()}",
-  "engineeredPrompt": "The master-tier image prompt in ${lang.toUpperCase()}",
-  "explanation": "Lighting, composition reasoning in ${lang.toUpperCase()}"
+  "goal": "Writing objective in ${lang.toUpperCase()}",
+  "engineeredPrompt": "The polished writing/content output in ${lang.toUpperCase()}",
+  "explanation": "Brief editorial reasoning in ${lang.toUpperCase()}"
 }
 `
         : `You are Promptuno, an AI Prompt Architect.
@@ -347,7 +310,7 @@ RESPOND ENTIRELY IN ${lang.toUpperCase()} LANGUAGE.
 Strict Protocols:
 1. CONTEXT SYNC: You MUST explicitly include and upgrade what the user said.
 2. Nonsense Detection: If the input is jibberish, return JSON with 'isNonsense' true and 'explanation' exactly "Error: I cannot generate a prompt for this input.".
-3. Deep Research: Cite specific advanced techniques based on the latest ${platform} capabilities.
+3. Platform Fit: Adapt the prompt to ${platform}'s best-known strengths without inventing fake capabilities.
 4. Unique Reasoning: Every 'explanation' must be completely unique.
 5. Elite Formatting: Use Markdown (###, -, >).
 
@@ -362,7 +325,9 @@ JSON structure:
 
       const aiPromise = generatePromptResponse(
         systemInstruction,
-        `User said: "${inputToUse}". Forge the best ${mode === "Code" ? "coding system" : "prompt"} for ${platform}.`,
+        mode === "Write"
+          ? `User said: "${inputToUse}". Write the polished output directly. Optimize for ${platform} style where useful.`
+          : `User said: "${inputToUse}". Generate the best prompt for ${platform}.`,
       );
 
       // 2. Short 1s buffer for the "Forging" button state to feel reactive
@@ -377,7 +342,7 @@ JSON structure:
       const result = await aiPromise;
       const responseText = result.text;
       
-      const data = parseGeneratedPrompt(responseText, platform, lang);
+      const data = parseGeneratedPrompt(responseText, platform, lang, mode);
       
       if (data.isNonsense) {
         setIsAnalyzing(false);
@@ -411,12 +376,12 @@ JSON structure:
   const handleRefine = async (type: RefinementType) => {
     let refinementRequest = "";
     const adaptedPlatform = platform === "ChatGPT" ? "Claude" : "ChatGPT";
-    if (mode === "Code") {
-      if (type === "concise") refinementRequest = `Refactor the following agent prompt for maximum token efficiency and direct execution: ${currentResponse?.engineeredPrompt}`;
-      if (type === "technician") refinementRequest = `Inject extreme technical constraints, specific library patterns, and advanced architectural rules into this agent prompt: ${currentResponse?.engineeredPrompt}`;
-      if (type === "corporate") refinementRequest = `Rewrite this coding-agent prompt for a serious enterprise engineering team, with compliance-aware wording, clear acceptance criteria, and low-risk execution: ${currentResponse?.engineeredPrompt}`;
-      if (type === "creative") refinementRequest = `Rewrite this coding-agent prompt to encourage more creative product thinking while keeping the implementation safe, testable, and repo-aware: ${currentResponse?.engineeredPrompt}`;
-      if (type === "adapt") refinementRequest = `Adapt this coding-agent prompt for ${adaptedPlatform}, preserving the technical intent but matching that platform's strengths: ${currentResponse?.engineeredPrompt}`;
+    if (mode === "Write") {
+      if (type === "concise") refinementRequest = `Shorten the following writing while keeping the meaning and usefulness: ${currentResponse?.engineeredPrompt}`;
+      if (type === "technician") refinementRequest = `Sharpen the following writing so it is clearer, more specific, and more persuasive: ${currentResponse?.engineeredPrompt}`;
+      if (type === "corporate") refinementRequest = `Rewrite the following writing in a polished, formal, business-ready tone: ${currentResponse?.engineeredPrompt}`;
+      if (type === "creative") refinementRequest = `Rewrite the following writing to feel warmer, friendlier, and more natural while staying professional: ${currentResponse?.engineeredPrompt}`;
+      if (type === "adapt") refinementRequest = `Rewrite the following content for ${adaptedPlatform}'s style while preserving the user's intent: ${currentResponse?.engineeredPrompt}`;
     } else {
       if (type === "concise") refinementRequest = `Make the following prompt as concise as possible while keeping the core instructions: ${currentResponse?.engineeredPrompt}`;
       if (type === "technician") refinementRequest = `Upgrade the following prompt with extreme technical detail, specific constraints, and complex formatting structures: ${currentResponse?.engineeredPrompt}`;
@@ -476,7 +441,7 @@ JSON structure:
       layout
       className={cn(
         "min-h-screen transition-all duration-500 font-sans selection:bg-neutral-200 dark:selection:bg-neutral-800 overflow-x-hidden flex flex-col relative",
-        mode === "Code" ? "bg-black text-green-500 font-mono" : (mode === "Image" ? "bg-white dark:bg-[#030303] text-purple-900 dark:text-purple-100" : "bg-white dark:bg-[#030303] text-neutral-800 dark:text-neutral-100")
+        "bg-white dark:bg-[#030303] text-neutral-800 dark:text-neutral-100"
       )}
     >
       {/* PWA Install Notice */}
@@ -522,23 +487,18 @@ JSON structure:
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className={cn(
           "absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] animate-pulse",
-          mode === "Code" ? "bg-green-500/10" : (mode === "Image" ? "bg-purple-500/10" : "bg-indigo-500/5 dark:bg-indigo-500/10")
+          mode === "Write" ? "bg-amber-500/5 dark:bg-amber-500/10" : "bg-indigo-500/5 dark:bg-indigo-500/10"
         )}></div>
         <div className={cn(
           "absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] animate-pulse",
-          mode === "Code" ? "bg-green-500/10" : (mode === "Image" ? "bg-pink-500/20" : "bg-amber-500/5 dark:bg-amber-500/10")
+          mode === "Write" ? "bg-indigo-500/5 dark:bg-indigo-500/10" : "bg-amber-500/5 dark:bg-amber-500/10"
         )} style={{ animationDelay: '2s' }}></div>
-        
-        {/* Code Mode Scanlines */}
-        {mode === "Code" && (
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-10 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
-        )}
       </div>
 
       {/* Header - Simple */}
       <header className={cn(
         "h-20 px-4 md:px-8 flex items-center justify-between sticky top-0 z-50 backdrop-blur-2xl border-b",
-        mode === "Code" ? "bg-black/40 border-green-500/20" : (mode === "Image" ? "bg-white/40 dark:bg-black/40 border-purple-500/20 shadow-[0_0_50px_rgba(168,85,247,0.05)]" : "bg-white/40 dark:bg-black/40 border-neutral-100 dark:border-white/5")
+        "bg-white/40 dark:bg-black/40 border-neutral-100 dark:border-white/5"
       )}>
         <div className="flex items-center gap-2">
           <button 
@@ -552,12 +512,12 @@ JSON structure:
         <div className="flex items-center gap-2 md:gap-6">
           <div className={cn(
             "flex items-center gap-2 px-2.5 md:px-4 py-1.5 rounded-full border shadow-inner",
-            mode === "Code" ? "bg-green-500/5 border-green-500/20" : "bg-neutral-50 dark:bg-neutral-900 border-neutral-200 dark:border-white/5"
+            "bg-neutral-50 dark:bg-neutral-900 border-neutral-200 dark:border-white/5"
           )}>
             <div className={cn("w-1.5 h-1.5 rounded-full", isLimitReached ? "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" : "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]")}></div>
             <span className={cn(
               "text-[9px] md:text-[10px] font-black uppercase tracking-[0.12em] md:tracking-widest whitespace-nowrap",
-              mode === "Code" ? "text-green-500/50" : "text-neutral-400 dark:text-neutral-500"
+              "text-neutral-400 dark:text-neutral-500"
             )}>{remaining} / {limit} Free</span>
           </div>
           
@@ -567,9 +527,7 @@ JSON structure:
             onClick={() => setView("pricing")}
             className={cn(
               "hidden min-[380px]:inline-flex px-3 py-2 rounded-full border text-[9px] font-black uppercase tracking-widest transition-all",
-              mode === "Code"
-                ? "border-green-500/20 text-green-500/60 hover:text-green-400 hover:border-green-500/40"
-                : "border-neutral-200 dark:border-white/10 text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
+              "border-neutral-200 dark:border-white/10 text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
             )}
           >
             Upgrade
@@ -636,7 +594,7 @@ JSON structure:
                         animate={{ opacity: 1, y: 0 }}
                         className={cn(
                           "mt-6 p-4 rounded-3xl text-center border",
-                          mode === "Code" ? "bg-red-500/5 border-red-500/20" : "bg-red-50/50 dark:bg-red-500/5 border-red-100/50 dark:border-red-500/10"
+                          "bg-red-50/50 dark:bg-red-500/5 border-red-100/50 dark:border-red-500/10"
                         )}
                       >
                         <span className="text-xs font-bold text-red-500 dark:text-red-400 uppercase tracking-widest">{error}</span>
@@ -662,10 +620,10 @@ JSON structure:
                       onClick={() => { setCurrentResponse(null); setView("app"); setInputValue(""); }}
                       className={cn(
                         "shadow-2xl rounded-full px-10 py-3.5 text-[13px] font-bold hover:scale-105 active:scale-95 transition-all",
-                        mode === "Code" ? "bg-green-500 text-black shadow-green-500/20" : "bg-black dark:bg-white text-white dark:text-black"
+                        "bg-black dark:bg-white text-white dark:text-black"
                       )}
                     >
-                      {lang === 'fr' ? 'Nouvelle Génération' : (lang === 'ar' ? 'جيل جديد' : (lang === 'tr' ? 'Yeni Nesil' : (lang === 'ru' ? 'Новая генерация' : 'New Generation')))}
+                      New Generation
                     </button>
                   </div>
                 </div>
@@ -715,7 +673,7 @@ JSON structure:
       {/* Footer Minimal */}
       <footer className={cn(
         "px-8 py-6 flex items-center justify-between border-t backdrop-blur-sm",
-        mode === "Code" ? "bg-black/50 border-green-500/10" : "bg-white/50 dark:bg-neutral-950/50 border-neutral-50 dark:border-neutral-900"
+        "bg-white/50 dark:bg-neutral-950/50 border-neutral-50 dark:border-neutral-900"
       )}>
         <div className="flex gap-6">
           <button onClick={() => setView("privacy")} className="text-[10px] font-bold text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 uppercase tracking-widest transition-colors">{lang === 'fr' ? 'CONFIDENTIALITÉ' : (lang === 'ar' ? 'الخصوصية' : (lang === 'tr' ? 'GİZLİLİK' : (lang === 'ru' ? 'КОНФИДЕНЦИАЛЬНОСТЬ' : 'PRIVACY')))}</button>

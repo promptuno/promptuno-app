@@ -26,14 +26,14 @@ export const LegalView: React.FC<LegalViewProps> = ({ type, onBack }) => {
           <section className="space-y-4">
             <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 italic">1. Introduction</h2>
             <p>
-              Welcome to Promptuno. We are committed to providing a high-quality prompt engineering tool while respecting your privacy and ensuring a fair usage environment.
+              Welcome to Promptuno at https://www.promptuno.chat/. Promptuno helps users generate better AI prompts and polished writing while respecting privacy and fair usage.
             </p>
           </section>
 
           <section className="space-y-4">
             <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 italic">2. Usage Policy</h2>
             <p>
-              Users are granted exactly 5 free prompt generations upon arrival. This usage is tracked via local storage on your device. We do not require account creation for this initial free tier.
+              Users are granted exactly 5 free generations across Prompt mode and Write mode. This usage is tracked via local storage on your device in the current auth-free version.
             </p>
           </section>
 
@@ -47,7 +47,7 @@ export const LegalView: React.FC<LegalViewProps> = ({ type, onBack }) => {
           <section className="space-y-4">
             <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 italic">4. Pro Subscription</h2>
             <p>
-              Promptuno Pro provides more prompt generation capacity, premium refinements, and future advanced prompt tools. Payments are handled securely through third-party processors.
+              Promptuno Pro provides continued generation access, Prompt mode, Write mode, Chrome extension assistance, premium refinements, and future advanced workflow tools. Payments are handled securely through third-party processors.
             </p>
           </section>
         </div>

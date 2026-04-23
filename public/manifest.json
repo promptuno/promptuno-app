@@ -1,7 +1,7 @@
 {
   "name": "Promptuno",
   "short_name": "Promptuno",
-  "description": "Premium prompt engineering workspace.",
+  "description": "Generate better prompts and polished writing for major AI tools.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",

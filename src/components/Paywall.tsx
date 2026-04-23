@@ -28,19 +28,19 @@ export const Paywall: React.FC<PaywallProps> = ({ isOpen, onClose }) => {
             <div className="space-y-3">
               <h2 className="text-3xl font-extrabold text-neutral-900 dark:text-neutral-100 tracking-tight">Free Limit Reached</h2>
               <p className="text-neutral-500 dark:text-neutral-400">
-                You’ve reached your 5 free prompt generations. Upgrade to Pro to keep generating better prompts without interruption.
+                You've reached your 5 free generations. Upgrade to Promptuno Pro to keep creating prompts and polished writing without interruption.
               </p>
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-neutral-400 dark:text-neutral-500">
-                Built for people who use AI seriously.
+                Use Promptuno on the web and inside your browser.
               </p>
             </div>
 
             <div className="space-y-4 text-left">
               {[
-                "More prompt generations",
-                "Premium refinements for tone, depth, and platform fit",
-                "Future advanced prompt tools",
-                "Saved workflows and productivity layers",
+                "Prompt mode and Write mode without interruption",
+                "Chrome extension assistance in supported text fields",
+                "Premium refinements for prompts and writing",
+                "Future saved prompts, drafts, and workflow libraries",
               ].map((feature, i) => (
                 <div key={i} className="flex items-center gap-3">
                   <div className="flex-shrink-0 w-5 h-5 bg-neutral-900 dark:bg-neutral-100 rounded-full flex items-center justify-center">

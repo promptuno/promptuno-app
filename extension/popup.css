@@ -120,12 +120,19 @@ footer,
 .mode-row,
 .platforms {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
   gap: 5px;
   padding: 5px;
   border: 1px solid var(--line);
   border-radius: 18px;
   background: var(--soft);
+}
+
+.mode-row {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.platforms {
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .mode,

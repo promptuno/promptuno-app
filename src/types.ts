@@ -2,18 +2,9 @@ export type Platform =
   | "ChatGPT"
   | "Gemini"
   | "Claude"
-  | "Copilot"
-  | "Perplexity"
-  | "Claude Code"
-  | "Aider"
-  | "Windsurf"
-  | "Cursor"
-  | "Bolt.new"
-  | "Codex"
-  | "Midjourney"
-  | "DALL-E 3";
+  | "Copilot";
 
-export type AppMode = "Forge" | "Code" | "Image";
+export type AppMode = "Prompt" | "Write";
 
 export type Language = "en" | "fr" | "ar" | "tr" | "ru";
 

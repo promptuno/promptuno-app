@@ -10,16 +10,16 @@ export const Pricing: React.FC = () => {
     {
       name: "Free",
       price: "$0",
-      description: "Start with focused prompt generation before upgrading.",
-      features: ["5 free prompt generations", "Primary models: ChatGPT, Claude, Gemini, and Copilot", "Core prompt engineering and copy actions"],
+      description: "Start with Promptuno's two core modes before upgrading.",
+      features: ["5 free generations", "Prompt mode access", "Limited writing assistance preview", "Primary models: ChatGPT, Claude, Gemini, and Copilot"],
       cta: "Current Plan",
       current: true,
     },
     {
       name: "Pro",
       price: PRO_PLAN_PRICE.display,
-      description: "Built for people who use AI seriously.",
-      features: ["More prompt generations without interruption", "Premium refinements for tone, depth, and platform fit", "Future advanced prompt tools and saved workflows", "Higher productivity for serious AI users"],
+      description: "Built for people who work with AI seriously.",
+      features: ["Generate prompts and polished writing without interruption", "Chrome extension support inside your browser", "Premium refinements for tone, depth, and platform fit", "Future prompt history, saved drafts, templates, and workflow layers"],
       cta: "Upgrade to Pro",
       current: false,
     },
@@ -78,7 +78,7 @@ export const Pricing: React.FC = () => {
           </div>
           <div>
             <h3 className="text-sm font-black uppercase tracking-[0.18em] text-neutral-900 dark:text-white">Premium layers coming next</h3>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">Promptuno stays focused on better prompts while the product expands cleanly.</p>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">Promptuno stays focused on prompts and writing while the product expands cleanly.</p>
           </div>
         </div>
 

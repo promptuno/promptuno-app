@@ -50,8 +50,8 @@ export const PayPalCheckout: React.FC = () => {
       no_shipping: "1",
       no_note: "0",
       custom: "promptuno-pro",
-      return: "https://promptuno.github.io/promptuno-app/?checkout=success",
-      cancel_return: "https://promptuno.github.io/promptuno-app/?checkout=cancelled",
+      return: "https://www.promptuno.chat/?checkout=success",
+      cancel_return: "https://www.promptuno.chat/?checkout=cancelled",
     }),
     [],
   );

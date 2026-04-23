@@ -1,14 +1,15 @@
 import React from "react";
 import { Sparkles } from "lucide-react";
 import { cn } from "../lib/utils";
+import { AppMode } from "../types";
 
 interface LogoProps {
   className?: string;
-  mode?: "Forge" | "Code" | "Image";
+  mode?: AppMode;
   showText?: boolean;
 }
 
-export const Logo: React.FC<LogoProps> = ({ className, mode = "Forge", showText = true }) => {
+export const Logo: React.FC<LogoProps> = ({ className, showText = true }) => {
   return (
     <div className={cn("flex items-center gap-2 group shrink-0", className)}>
       <div className="relative w-10 h-10 flex items-center justify-center">
@@ -43,7 +44,7 @@ export const Logo: React.FC<LogoProps> = ({ className, mode = "Forge", showText 
       {showText && (
         <span className={cn(
           "font-extrabold text-xl md:text-2xl tracking-tighter transition-all duration-300",
-          mode === "Code" ? "text-green-500" : "text-[#1A1C2C] dark:text-white"
+          "text-[#1A1C2C] dark:text-white"
         )}>
           Promptuno
         </span>

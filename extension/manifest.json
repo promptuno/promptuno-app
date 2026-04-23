@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Promptuno - Prompt Improver",
+  "name": "Promptuno - Prompt and Write",
   "short_name": "Promptuno",
   "version": "0.1.0",
-  "description": "Improve prompts in one click and use Promptuno anywhere you write.",
+  "description": "Generate better prompts and polished writing anywhere you work.",
   "action": {
     "default_title": "Promptuno",
     "default_popup": "popup.html",
@@ -39,7 +39,7 @@
         "default": "Alt+Shift+P",
         "mac": "Alt+Shift+P"
       },
-      "description": "Improve selected text with Promptuno"
+      "description": "Open Promptuno for selected text"
     }
   }
 }
