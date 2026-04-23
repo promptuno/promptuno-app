@@ -28,6 +28,8 @@ jobs:
       - run: npm run build
         env:
           GITHUB_PAGES: "true"
+          VITE_PAYPAL_CLIENT_ID: ${{ vars.VITE_PAYPAL_CLIENT_ID }}
+          VITE_PAYPAL_PLAN_ID: ${{ vars.VITE_PAYPAL_PLAN_ID }}
       - uses: actions/configure-pages@v5
         with:
           enablement: true
