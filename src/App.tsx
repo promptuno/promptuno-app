@@ -5,6 +5,7 @@ import { useTheme } from "./hooks/useTheme";
 import { Composer } from "./components/Composer";
 import { PromptResponse } from "./components/PromptResponse";
 import { Pricing } from "./components/Pricing";
+import { RefinePanel } from "./components/RefinePanel";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { LegalView } from "./components/LegalView";
 import { cn } from "./lib/utils";
@@ -172,6 +173,39 @@ CRITICAL OUTPUT RULE: Return only one valid JSON object matching the requested s
   return { text };
 }
 
+function buildRefineQuestions(input: string, mode: AppMode, platform: Platform) {
+  const text = input.trim();
+  const words = text.split(/\s+/).filter(Boolean);
+  const hasHelpfulDetail =
+    words.length > 32 &&
+    /\b(for|audience|format|tone|goal|because|using|with|target|must|avoid)\b/i.test(text);
+
+  if (hasHelpfulDetail) return [];
+
+  const questions =
+    mode === "Code"
+      ? [
+          "What stack, framework, or repo context should the prompt respect?",
+          "What should the coding agent avoid changing?",
+          "How will you know the implementation is finished?",
+        ]
+      : mode === "Image"
+        ? [
+            "What should be the main subject or product in the image prompt?",
+            "What mood, style, or visual reference should it follow?",
+            "Where will this image be used?",
+          ]
+        : [
+            `Who is the ${platform} answer meant for?`,
+            "What tone should the result have?",
+            "What format should the AI return?",
+          ];
+
+  if (words.length < 10) return questions;
+  if (words.length < 22) return questions.slice(0, 2);
+  return questions.slice(0, 1);
+}
+
 export default function App() {
   const [mode, setMode] = useState<AppMode>("Forge");
   const [platform, setPlatform] = useState<Platform>("ChatGPT");
@@ -187,11 +221,21 @@ export default function App() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallNotice, setShowInstallNotice] = useState(false);
   const [activeRequest, setActiveRequest] = useState("");
+  const [refineQuestions, setRefineQuestions] = useState<string[]>([]);
+  const [refineAnswers, setRefineAnswers] = useState<string[]>([]);
   
   const t = translations[lang];
 
   const { isLimitReached, limit, remaining, increment, reset } = useUsageLimit();
   const { theme, toggleTheme } = useTheme();
+
+  const handleInputChange = (nextValue: any) => {
+    setInputValue((previous) => (typeof nextValue === "function" ? nextValue(previous) : nextValue));
+    if (refineQuestions.length) {
+      setRefineQuestions([]);
+      setRefineAnswers([]);
+    }
+  };
 
   useEffect(() => {
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -252,6 +296,8 @@ export default function App() {
     setActiveRequest(inputToUse);
     setCurrentResponse(null);
     setError(null);
+    setRefineQuestions([]);
+    setRefineAnswers([]);
 
     try {
       // 1. Kick off the AI process immediately
@@ -380,6 +426,49 @@ JSON structure:
     }
 
     handleGenerate(refinementRequest);
+  };
+
+  const handleRefineIntent = () => {
+    if (!inputValue.trim() || isGenerating || isAnalyzing || isLimitReached) return;
+
+    const questions = buildRefineQuestions(inputValue, mode, platform);
+    if (!questions.length) {
+      handleGenerate();
+      return;
+    }
+
+    setError(null);
+    setRefineQuestions(questions);
+    setRefineAnswers(questions.map(() => ""));
+  };
+
+  const handleRefineAnswerChange = (index: number, value: string) => {
+    setRefineAnswers((current) => {
+      const next = [...current];
+      next[index] = value;
+      return next;
+    });
+  };
+
+  const handleRefineCancel = () => {
+    setRefineQuestions([]);
+    setRefineAnswers([]);
+  };
+
+  const handleRefineSubmit = () => {
+    const details = refineQuestions
+      .map((question, index) => {
+        const answer = refineAnswers[index]?.trim();
+        return answer ? `- ${question} ${answer}` : "";
+      })
+      .filter(Boolean)
+      .join("\n");
+
+    const refinedInput = details
+      ? `${inputValue.trim()}\n\nClarifying details:\n${details}`
+      : inputValue.trim();
+
+    handleGenerate(refinedInput);
   };
 
   return (
@@ -512,7 +601,7 @@ JSON structure:
                   >
                     <Composer 
                       value={inputValue} 
-                      onChange={setInputValue} 
+                      onChange={handleInputChange} 
                       onSend={() => handleGenerate()}
                       disabled={isGenerating || isAnalyzing}
                       isGenerating={isGenerating || isAnalyzing}
@@ -523,8 +612,23 @@ JSON structure:
                       usageRemaining={remaining}
                       usageLimit={limit}
                       onUpgrade={() => setView("pricing")}
+                      onRefineIntent={handleRefineIntent}
                       lang={lang}
                     />
+
+                    <AnimatePresence>
+                      {refineQuestions.length > 0 && (
+                        <RefinePanel
+                          questions={refineQuestions}
+                          answers={refineAnswers}
+                          onAnswerChange={handleRefineAnswerChange}
+                          onCancel={handleRefineCancel}
+                          onSubmit={handleRefineSubmit}
+                          mode={mode}
+                          platform={platform}
+                        />
+                      )}
+                    </AnimatePresence>
                     
                     {error && (
                       <motion.div 

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Promptuno</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="mark"></div>
+          <div>
+            <h1>Promptuno</h1>
+            <p>Use better prompts anywhere.</p>
+          </div>
+        </div>
+        <div id="usagePill" class="usage-pill">5 / 5 free</div>
+      </header>
+
+      <section id="paywall" class="paywall hidden">
+        <h2>You've reached your free prompt limit.</h2>
+        <p>Upgrade to Promptuno Pro to keep generating without interruption.</p>
+        <p class="muted">Built for people who use AI seriously.</p>
+        <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+          <input type="hidden" name="cmd" value="_xclick" />
+          <input type="hidden" name="business" value="AFI5@OUTLOOK.COM" />
+          <input type="hidden" name="item_name" value="Promptuno Pro monthly access" />
+          <input type="hidden" name="amount" value="15.00" />
+          <input type="hidden" name="currency_code" value="USD" />
+          <input type="hidden" name="no_shipping" value="1" />
+          <input type="hidden" name="custom" value="promptuno-pro-extension" />
+          <button type="submit" class="primary">Pay $15 with PayPal</button>
+        </form>
+      </section>
+
+      <section id="workspace" class="workspace">
+        <div class="mode-row" role="tablist" aria-label="Promptuno mode">
+          <button class="mode active" data-mode="improve">Improve</button>
+          <button class="mode" data-mode="refine">Refine</button>
+          <button class="mode" data-mode="write">Write</button>
+          <button class="mode" data-mode="library">Library</button>
+        </div>
+
+        <div id="editorPanel">
+          <label class="label" for="platform">Optimize for</label>
+          <div id="platforms" class="platforms">
+            <button class="platform active" data-platform="ChatGPT">ChatGPT</button>
+            <button class="platform" data-platform="Claude">Claude</button>
+            <button class="platform" data-platform="Gemini">Gemini</button>
+            <button class="platform" data-platform="Copilot">Copilot</button>
+          </div>
+
+          <textarea id="input" placeholder="Paste a rough prompt, email idea, reply, or work request..."></textarea>
+
+          <div id="refineBox" class="refine-box hidden">
+            <div class="mini-title">A few details will make this stronger</div>
+            <div id="questions"></div>
+          </div>
+
+          <button id="generate" class="primary">Improve Prompt</button>
+          <p id="status" class="status"></p>
+
+          <section id="outputWrap" class="output-wrap hidden">
+            <div class="output-head">
+              <span>Promptuno result</span>
+              <div class="output-actions">
+                <button id="copyOutput">Copy</button>
+                <button id="saveOutput">Save</button>
+                <button id="insertOutput">Insert</button>
+              </div>
+            </div>
+            <pre id="output"></pre>
+          </section>
+        </div>
+
+        <section id="libraryPanel" class="library hidden">
+          <div class="library-card">
+            <h2>Prompt Library</h2>
+            <p>Saved prompts and prompt history will become a Pro workspace layer. Your local saves appear here for now.</p>
+          </div>
+          <div id="savedList" class="list"></div>
+          <div id="historyList" class="list"></div>
+        </section>
+      </section>
+
+      <footer>
+        <span>Alt + Shift + P improves selected text</span>
+        <a href="https://promptuno.github.io/promptuno-app/" target="_blank">Open web app</a>
+      </footer>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

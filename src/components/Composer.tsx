@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { ArrowUp, ChevronDown, Mic, MicOff, Image as ImageIcon, Rocket } from "lucide-react";
+import { ArrowUp, ChevronDown, Mic, MicOff, Image as ImageIcon, Rocket, SlidersHorizontal } from "lucide-react";
 import { cn } from "../lib/utils";
 import { AppMode, Platform } from "../types";
 import { PLATFORMS, CODE_PLATFORMS, IMAGE_PLATFORMS } from "../constants";
@@ -22,6 +22,7 @@ interface ComposerProps {
   usageRemaining?: number;
   usageLimit?: number;
   onUpgrade?: () => void;
+  onRefineIntent?: () => void;
   lang: Language;
 }
 
@@ -38,6 +39,7 @@ export const Composer: React.FC<ComposerProps> = ({
   usageRemaining = 0,
   usageLimit = 5,
   onUpgrade,
+  onRefineIntent,
   lang,
 }) => {
   const t = translations[lang];
@@ -490,10 +492,29 @@ export const Composer: React.FC<ComposerProps> = ({
           </div>
 
           <button
+            type="button"
+            disabled={disabled || !value.trim() || isLimitReached}
+            onClick={onRefineIntent}
+            className={cn(
+              "group w-full sm:w-auto px-5 py-4 rounded-[20px] md:rounded-[24px] text-[12px] md:text-[13px] font-black uppercase tracking-[0.12em] transition-all duration-300 flex items-center justify-center gap-2 order-1 sm:order-2 border",
+              mode === "Code"
+                ? (value.trim() && !disabled && !isLimitReached ? "border-green-500/30 text-green-400 hover:bg-green-500/10" : "border-green-900/20 text-green-900")
+                : mode === "Image"
+                  ? (value.trim() && !disabled && !isLimitReached ? "border-purple-500/20 text-purple-600 dark:text-purple-300 hover:bg-purple-500/10" : "border-purple-900/10 text-purple-900/30")
+                  : (value.trim() && !disabled && !isLimitReached
+                    ? "border-neutral-200 dark:border-white/10 text-neutral-500 dark:text-neutral-400 hover:border-neutral-900 dark:hover:border-white hover:text-neutral-900 dark:hover:text-white"
+                    : "border-neutral-100 dark:border-white/5 text-neutral-300 dark:text-neutral-800 cursor-not-allowed")
+            )}
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            Refine First
+          </button>
+
+          <button
             type="submit"
             disabled={disabled || !value.trim() || isLimitReached}
             className={cn(
-              "group relative w-full sm:w-auto px-8 py-4 rounded-[20px] md:rounded-[24px] text-[13px] md:text-[15px] font-black uppercase tracking-[0.12em] md:tracking-[0.15em] transition-all duration-500 overflow-hidden shadow-2xl flex items-center justify-center order-1 sm:order-2",
+              "group relative w-full sm:w-auto px-8 py-4 rounded-[20px] md:rounded-[24px] text-[13px] md:text-[15px] font-black uppercase tracking-[0.12em] md:tracking-[0.15em] transition-all duration-500 overflow-hidden shadow-2xl flex items-center justify-center order-1 sm:order-3",
               mode === "Code" 
                 ? (value.trim() && !disabled && !isLimitReached ? "bg-green-500 text-black hover:bg-green-400" : "bg-green-900/20 text-green-900")
                 : (mode === "Image"

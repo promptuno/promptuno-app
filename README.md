@@ -27,3 +27,16 @@ Pro checkout uses PayPal at the current site price of `$15 USD`. Add `VITE_PAYPA
 GitHub Pages is static and cannot safely hold private API keys, so the Pages build falls back to Pollinations' public text API in the browser. Optional: create a `.env.local` file and set `POLLINATIONS_API_KEY` if you want authenticated Pollinations access on the server.
 
 If you deploy the Express server separately, build the static frontend with `VITE_API_BASE_URL` pointing to that backend URL. The frontend will call `VITE_API_BASE_URL/api/generate`, while `OPENAI_API_KEY` stays private on the backend.
+
+## Chrome extension
+
+The launch-ready Chrome extension lives in `extension/`.
+
+Load it locally:
+
+1. Open `chrome://extensions`
+2. Enable Developer mode
+3. Choose "Load unpacked"
+4. Select the `extension/` folder
+
+The extension keeps the same 5 free generations rule, uses the same primary models (ChatGPT, Claude, Gemini, Copilot), adds one-click prompt improvement, includes an optional refine flow, supports insertion into editable fields, and stores prompt history/saved prompts locally. Chrome Web Store copy is included in `extension/STORE_LISTING.md`.
