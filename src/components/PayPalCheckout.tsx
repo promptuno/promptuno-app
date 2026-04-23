@@ -1,5 +1,5 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
-import { Check, Lock, ShieldCheck } from "lucide-react";
+import { Check, ShieldCheck } from "lucide-react";
 import { motion } from "motion/react";
 import {
   PAYPAL_CLIENT_ID,
@@ -198,11 +198,6 @@ export const PayPalCheckout: React.FC = () => {
           </span>
         </motion.div>
       )}
-
-      <div className="flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] opacity-60">
-        <Lock className="w-3.5 h-3.5" />
-        Secure PayPal checkout
-      </div>
     </div>
   );
 };
