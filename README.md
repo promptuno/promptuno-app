@@ -22,6 +22,8 @@ Prompt generation uses the server `/api/generate` route when the app is hosted o
 
 The free product tier grants exactly 5 prompt generations before the Pro paywall appears. Usage is tracked client-side for the current auth-free version.
 
+Pro checkout uses PayPal at the current site price of `$15 USD`. Add `VITE_PAYPAL_CLIENT_ID` to enable embedded PayPal buttons. Add `VITE_PAYPAL_PLAN_ID` as well if you create a PayPal Subscriptions plan for the monthly Pro price. Without those public PayPal IDs, the app shows a PayPal Standard checkout form that sends payment to `AFI5@OUTLOOK.COM`.
+
 GitHub Pages is static and cannot safely hold private API keys, so the Pages build falls back to Pollinations' public text API in the browser. Optional: create a `.env.local` file and set `POLLINATIONS_API_KEY` if you want authenticated Pollinations access on the server.
 
 If you deploy the Express server separately, build the static frontend with `VITE_API_BASE_URL` pointing to that backend URL. The frontend will call `VITE_API_BASE_URL/api/generate`, while `OPENAI_API_KEY` stays private on the backend.

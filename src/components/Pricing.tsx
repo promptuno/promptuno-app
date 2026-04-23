@@ -1,7 +1,9 @@
 import React from "react";
-import { Check, Layers, Zap } from "lucide-react";
+import { Check, Layers } from "lucide-react";
 import { motion } from "motion/react";
 import { premiumLayers } from "../lib/productLayers";
+import { PRO_PLAN_PRICE } from "../lib/payments";
+import { PayPalCheckout } from "./PayPalCheckout";
 
 export const Pricing: React.FC = () => {
   const plans = [
@@ -15,12 +17,11 @@ export const Pricing: React.FC = () => {
     },
     {
       name: "Pro",
-      price: "$15",
+      price: PRO_PLAN_PRICE.display,
       description: "Built for people who use AI seriously.",
       features: ["More prompt generations without interruption", "Premium refinements for tone, depth, and platform fit", "Future advanced prompt tools and saved workflows", "Higher productivity for serious AI users"],
       cta: "Upgrade to Pro",
       current: false,
-      url: "https://pay.ziina.com/ahmedafi/5MLntD0hd"
     },
   ];
 
@@ -44,7 +45,7 @@ export const Pricing: React.FC = () => {
                 <div className="text-sm font-bold uppercase tracking-widest opacity-60">{plan.name}</div>
                 <div className="flex items-baseline gap-1 mt-2">
                   <span className="text-4xl font-extrabold tracking-tight">{plan.price}</span>
-                  <span className="text-sm opacity-60">/mo</span>
+                  {!plan.current && <span className="text-sm opacity-60">{PRO_PLAN_PRICE.interval}</span>}
                 </div>
                 <p className="mt-3 text-sm opacity-80 leading-relaxed font-medium">{plan.description}</p>
               </div>
@@ -58,19 +59,13 @@ export const Pricing: React.FC = () => {
                 ))}
               </div>
 
-              <a
-                href={plan.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 ${
-                  plan.current
-                    ? "bg-neutral-100 dark:bg-neutral-800 text-neutral-400 cursor-not-allowed pointer-events-none"
-                    : "bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 shadow-lg"
-                }`}
-              >
-                {!plan.current && <Zap className="w-5 h-5 fill-current" />}
-                {plan.cta}
-              </a>
+              {plan.current ? (
+                <div className="w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-400 cursor-not-allowed">
+                  {plan.cta}
+                </div>
+              ) : (
+                <PayPalCheckout />
+              )}
             </div>
           </motion.div>
         ))}

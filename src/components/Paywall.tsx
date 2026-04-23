@@ -1,6 +1,7 @@
 import React from "react";
-import { Lock, Zap, Check } from "lucide-react";
+import { Lock, Check } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { PayPalCheckout } from "./PayPalCheckout";
 
 interface PaywallProps {
   isOpen: boolean;
@@ -51,10 +52,7 @@ export const Paywall: React.FC<PaywallProps> = ({ isOpen, onClose }) => {
             </div>
 
             <div className="space-y-3 pt-4">
-              <button className="w-full py-4 px-6 bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all">
-                <Zap className="w-5 h-5" />
-                Upgrade to Pro — $15/mo
-              </button>
+              <PayPalCheckout />
               <button
                 onClick={onClose}
                 className="w-full py-3 px-6 text-sm font-bold text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
