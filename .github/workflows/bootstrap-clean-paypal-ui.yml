@@ -1,0 +1,30 @@
+name: Bootstrap Clean PayPal UI
+
+on:
+  push:
+    paths:
+      - .github/workflows/bootstrap-clean-paypal-ui.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  upload-project:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download source archive
+        run: |
+          curl -L "https://tmpfiles.org/dl/34820527/promptuno-clean-paypal-ui.zip" -o /tmp/promptuno-clean-paypal-ui.zip
+      - name: Unpack source files
+        run: |
+          unzip -o /tmp/promptuno-clean-paypal-ui.zip -d .
+          rm -f /tmp/promptuno-clean-paypal-ui.zip
+      - name: Commit source files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A -- ':!.github/workflows/*.yml'
+          git commit -m "Clean PayPal checkout copy" || exit 0
+          git push
