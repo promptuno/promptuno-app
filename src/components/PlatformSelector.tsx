@@ -3,6 +3,7 @@ import { Platform } from "../types";
 import { PLATFORMS } from "../constants";
 import { cn } from "../lib/utils";
 import { motion } from "motion/react";
+import { PRIMARY_MODEL_LIMIT } from "../lib/productLayers";
 
 interface PlatformSelectorProps {
   selected: Platform;
@@ -15,7 +16,7 @@ export const PlatformSelector: React.FC<PlatformSelectorProps> = ({
 }) => {
   return (
     <div className="flex flex-wrap items-center bg-neutral-100/50 dark:bg-neutral-800/10 p-1 rounded-full border border-neutral-200/50 dark:border-neutral-800 gap-0">
-      {PLATFORMS.map((platform) => (
+      {PLATFORMS.slice(0, PRIMARY_MODEL_LIMIT).map((platform) => (
         <button
           key={platform}
           onClick={() => onSelect(platform)}

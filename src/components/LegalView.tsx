@@ -33,7 +33,7 @@ export const LegalView: React.FC<LegalViewProps> = ({ type, onBack }) => {
           <section className="space-y-4">
             <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 italic">2. Usage Policy</h2>
             <p>
-              Users are granted exactly 10 free generations upon arrival. This usage is tracked via local storage on your device. We do not require account creation for this initial free tier.
+              Users are granted exactly 5 free prompt generations upon arrival. This usage is tracked via local storage on your device. We do not require account creation for this initial free tier.
             </p>
           </section>
 
@@ -47,7 +47,7 @@ export const LegalView: React.FC<LegalViewProps> = ({ type, onBack }) => {
           <section className="space-y-4">
             <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 italic">4. Pro Subscription</h2>
             <p>
-              Promptuno Pro provides unlimited usage and enhanced features. Payments are handled securely through third-party processors.
+              Promptuno Pro provides more prompt generation capacity, premium refinements, and future advanced prompt tools. Payments are handled securely through third-party processors.
             </p>
           </section>
         </div>

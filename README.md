@@ -20,6 +20,8 @@ View your app in AI Studio: https://ai.studio/apps/61e35416-9d71-48e3-a785-1748e
 
 Prompt generation uses the server `/api/generate` route when the app is hosted on a Node server. Set `OPENAI_API_KEY` as a private server environment variable to use your OpenAI credits without exposing the key publicly.
 
+The free product tier grants exactly 5 prompt generations before the Pro paywall appears. Usage is tracked client-side for the current auth-free version.
+
 GitHub Pages is static and cannot safely hold private API keys, so the Pages build falls back to Pollinations' public text API in the browser. Optional: create a `.env.local` file and set `POLLINATIONS_API_KEY` if you want authenticated Pollinations access on the server.
 
 If you deploy the Express server separately, build the static frontend with `VITE_API_BASE_URL` pointing to that backend URL. The frontend will call `VITE_API_BASE_URL/api/generate`, while `OPENAI_API_KEY` stays private on the backend.

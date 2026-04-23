@@ -29,9 +29,9 @@ export const translations = {
       WaitMessage: "Please wait a moment",
       Engineering: "Engineering {platform} Data",
       Forging: "Forging...",
-      LimitReached: "Limit Reached",
-      LimitDescription: "You've reached your monthly forge limit. Upgrade for unlimited power.",
-      LeftCount: "{count} Forges Left",
+      LimitReached: "Free Limit Reached",
+      LimitDescription: "You’ve reached your 5 free prompt generations. Upgrade to Pro to keep generating better prompts without interruption.",
+      LeftCount: "{count} Free Prompts Left",
     },
     refinements: {
       Concise: "Shorten & Clean",
@@ -79,7 +79,7 @@ export const translations = {
       Engineering: "Ingénierie des données {platform}",
       Forging: "Forge en cours...",
       LimitReached: "Limite Atteinte",
-      LimitDescription: "Vous avez atteint votre limite mensuelle. Passez à la version Pro pour un accès illimité.",
+      LimitDescription: "Vous avez atteint vos 5 générations gratuites. Passez à Pro pour continuer sans interruption.",
       LeftCount: "{count} Forges Restantes",
     },
     refinements: {
@@ -128,7 +128,7 @@ export const translations = {
       Engineering: "هندسة بيانات {platform}",
       Forging: "جاري الفورج...",
       LimitReached: "تم الوصول للحد الأقصى",
-      LimitDescription: "لقد وصلت إلى حد الفورج الشهري. قم بالترقية للحصول على قوة غير محدودة.",
+      LimitDescription: "لقد وصلت إلى 5 أجيال مجانية. قم بالترقية إلى Pro للمتابعة دون انقطاع.",
       LeftCount: "بقي {count} فورج",
     },
     refinements: {
@@ -177,7 +177,7 @@ export const translations = {
       Engineering: "{platform} Veri Mühendisliği",
       Forging: "Forge ediliyor...",
       LimitReached: "Sınıra Ulaşıldı",
-      LimitDescription: "Aylık forge sınırınıza ulaştınız. Sınırsız güç için yükseltin.",
+      LimitDescription: "5 ücretsiz prompt hakkınıza ulaştınız. Kesintisiz devam etmek için Pro'ya yükseltin.",
       LeftCount: "{count} Forge Kaldı",
     },
     refinements: {
@@ -226,7 +226,7 @@ export const translations = {
       Engineering: "Инженерия данных {platform}",
       Forging: "Создание...",
       LimitReached: "Лимит Исчерпан",
-      LimitDescription: "Вы достигли своего ежемесячного лимита. Улучшите аккаунт для безлимита.",
+      LimitDescription: "Вы использовали 5 бесплатных генераций. Перейдите на Pro, чтобы продолжить без перерыва.",
       LeftCount: "Осталось форжей: {count}",
     },
     refinements: {

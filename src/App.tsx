@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { AppMode, GeneratedPrompt, Platform } from "./types";
+import { AppMode, GeneratedPrompt, Platform, RefinementType } from "./types";
 import { useUsageLimit } from "./hooks/useUsageLimit";
 import { useTheme } from "./hooks/useTheme";
 import { Composer } from "./components/Composer";
@@ -190,7 +190,7 @@ export default function App() {
   
   const t = translations[lang];
 
-  const { count, isLimitReached, limit, increment, reset } = useUsageLimit();
+  const { isLimitReached, limit, remaining, increment, reset } = useUsageLimit();
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -234,7 +234,9 @@ export default function App() {
       return;
     }
     
-    if (isLimitReached && !refinement) {
+    if (isLimitReached) {
+      setCurrentResponse(null);
+      setView("app");
       return;
     }
 
@@ -360,16 +362,21 @@ JSON structure:
     }
   };
 
-  const handleRefine = async (type: "reforge" | "concise" | "technician") => {
+  const handleRefine = async (type: RefinementType) => {
     let refinementRequest = "";
+    const adaptedPlatform = platform === "ChatGPT" ? "Claude" : "ChatGPT";
     if (mode === "Code") {
       if (type === "concise") refinementRequest = `Refactor the following agent prompt for maximum token efficiency and direct execution: ${currentResponse?.engineeredPrompt}`;
       if (type === "technician") refinementRequest = `Inject extreme technical constraints, specific library patterns, and advanced architectural rules into this agent prompt: ${currentResponse?.engineeredPrompt}`;
-      if (type === "reforge") refinementRequest = `Completely re-architect the following coding logic from a new system perspective: ${currentResponse?.engineeredPrompt}`;
+      if (type === "corporate") refinementRequest = `Rewrite this coding-agent prompt for a serious enterprise engineering team, with compliance-aware wording, clear acceptance criteria, and low-risk execution: ${currentResponse?.engineeredPrompt}`;
+      if (type === "creative") refinementRequest = `Rewrite this coding-agent prompt to encourage more creative product thinking while keeping the implementation safe, testable, and repo-aware: ${currentResponse?.engineeredPrompt}`;
+      if (type === "adapt") refinementRequest = `Adapt this coding-agent prompt for ${adaptedPlatform}, preserving the technical intent but matching that platform's strengths: ${currentResponse?.engineeredPrompt}`;
     } else {
       if (type === "concise") refinementRequest = `Make the following prompt as concise as possible while keeping the core instructions: ${currentResponse?.engineeredPrompt}`;
       if (type === "technician") refinementRequest = `Upgrade the following prompt with extreme technical detail, specific constraints, and complex formatting structures: ${currentResponse?.engineeredPrompt}`;
-      if (type === "reforge") refinementRequest = `Completely re-imagine the following prompt from a new specialized perspective, adding more deep search context: ${currentResponse?.engineeredPrompt}`;
+      if (type === "corporate") refinementRequest = `Rewrite the following prompt in a polished corporate style for serious workplace use, with executive clarity and professional tone: ${currentResponse?.engineeredPrompt}`;
+      if (type === "creative") refinementRequest = `Rewrite the following prompt to be more creative, distinctive, and exploratory while keeping the user's goal intact: ${currentResponse?.engineeredPrompt}`;
+      if (type === "adapt") refinementRequest = `Adapt the following prompt for ${adaptedPlatform}, preserving intent while matching ${adaptedPlatform}'s best prompt style: ${currentResponse?.engineeredPrompt}`;
     }
 
     handleGenerate(refinementRequest);
@@ -455,14 +462,14 @@ JSON structure:
 
         <div className="flex items-center gap-2 md:gap-6">
           <div className={cn(
-            "hidden sm:flex items-center gap-2.5 px-3 md:px-4 py-1.5 rounded-full border shadow-inner",
+            "flex items-center gap-2 px-2.5 md:px-4 py-1.5 rounded-full border shadow-inner",
             mode === "Code" ? "bg-green-500/5 border-green-500/20" : "bg-neutral-50 dark:bg-neutral-900 border-neutral-200 dark:border-white/5"
           )}>
             <div className={cn("w-1.5 h-1.5 rounded-full", isLimitReached ? "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" : "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]")}></div>
             <span className={cn(
-              "text-[9px] md:text-[10px] font-black uppercase tracking-widest",
+              "text-[9px] md:text-[10px] font-black uppercase tracking-[0.12em] md:tracking-widest whitespace-nowrap",
               mode === "Code" ? "text-green-500/50" : "text-neutral-400 dark:text-neutral-500"
-            )}>{limit - count} {limit - count === 1 ? 'Forge' : 'Forges'} Left</span>
+            )}>{remaining} / {limit} Free</span>
           </div>
           
           <LanguageSwitcher current={lang} onSelect={setLang} mode={mode} />
@@ -513,6 +520,8 @@ JSON structure:
                       onPlatformChange={setPlatform}
                       mode={mode}
                       isLimitReached={isLimitReached}
+                      usageRemaining={remaining}
+                      usageLimit={limit}
                       onUpgrade={() => setView("pricing")}
                       lang={lang}
                     />

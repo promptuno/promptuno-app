@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const LIMIT = 10;
+const LIMIT = 5;
 const STORAGE_KEY = "promptuno_usage_count_v2";
 
 export function useUsageLimit() {
@@ -13,13 +13,14 @@ export function useUsageLimit() {
     localStorage.setItem(STORAGE_KEY, count.toString());
   }, [count]);
 
-  const increment = () => setCount((prev) => prev + 1);
+  const increment = () => setCount((prev) => Math.min(prev + 1, LIMIT));
   const reset = () => setCount(0); // For dev/testing purposes if needed
 
   return {
     count,
     isLimitReached: count >= LIMIT,
     limit: LIMIT,
+    remaining: Math.max(0, LIMIT - count),
     increment,
     reset,
   };

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Copy, Check, RotateCcw, Zap, Scissors, ChevronRight, Sparkles, Terminal, Palette } from "lucide-react";
-import { AppMode, GeneratedPrompt, Platform, Language } from "../types";
+import { AppMode, GeneratedPrompt, Platform, Language, RefinementType } from "../types";
 import { cn } from "../lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import { Typewriter } from "./Typewriter";
@@ -11,7 +11,7 @@ interface PromptResponseProps {
   platform: Platform;
   response: GeneratedPrompt;
   onRegenerate: () => void;
-  onRefine: (type: "reforge" | "concise" | "technician") => void;
+  onRefine: (type: RefinementType) => void;
   mode: AppMode;
   lang: Language;
 }
@@ -42,6 +42,33 @@ export const PromptResponse: React.FC<PromptResponseProps> = ({
     : isImage
       ? (lang === 'fr' ? 'Prompt Image Prêt' : (lang === 'ar' ? 'مطالبة الصورة جاهزة' : (lang === 'tr' ? 'Görsel Prompt Hazır' : (lang === 'ru' ? 'Промпт изображения готов' : 'Image Prompt Ready'))))
       : (lang === 'fr' ? 'Prompt Prêt' : (lang === 'ar' ? 'المطالبة جاهزة' : (lang === 'tr' ? 'Prompt Hazır' : (lang === 'ru' ? 'Промпт готов' : 'Prompt Ready'))));
+  const refinementActions: Array<{ type: RefinementType; label: string; icon: React.ReactNode }> = [
+    {
+      type: "concise",
+      label: lang === "en" ? "Make Shorter" : (isCode ? t.refinements.CodeConcise : (isImage ? t.refinements.ImageConcise : t.refinements.Concise)),
+      icon: <Scissors className="w-4 h-4 transition-transform group-hover:scale-110" />,
+    },
+    {
+      type: "technician",
+      label: lang === "en" ? "More Advanced" : (isCode ? t.refinements.CodeTechnician : (isImage ? t.refinements.ImageTechnician : t.refinements.Technician)),
+      icon: <Zap className="w-4 h-4 transition-transform group-hover:scale-110 group-hover:text-amber-500" />,
+    },
+    {
+      type: "corporate",
+      label: "More Corporate",
+      icon: <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />,
+    },
+    {
+      type: "creative",
+      label: "More Creative",
+      icon: <Sparkles className="w-4 h-4 transition-transform group-hover:scale-110" />,
+    },
+    {
+      type: "adapt",
+      label: "Adapt Platform",
+      icon: <RotateCcw className="w-4 h-4 transition-transform group-hover:rotate-180 duration-500" />,
+    },
+  ];
 
   return (
     <motion.div
@@ -206,34 +233,23 @@ export const PromptResponse: React.FC<PromptResponseProps> = ({
                     <RotateCcw className="w-4 h-4 transition-transform group-hover:rotate-180 duration-500" />
                     {isCode ? t.refinements.CodeReforge : (isImage ? t.refinements.ImageReforge : t.refinements.Reforge)}
                   </button>
-                  <button
-                    onClick={() => onRefine("concise")}
-                    className={cn(
-                      "group px-6 py-3 border rounded-xl text-[12px] font-black uppercase tracking-[0.15em] transition-all flex items-center gap-2 shadow-sm",
-                      isCode 
-                        ? "bg-black text-green-500 border-green-500/20 hover:border-green-500" 
-                        : (isImage 
-                            ? "bg-white text-purple-600 border-purple-200 hover:border-purple-500" 
-                            : "bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-white/10 hover:border-black dark:hover:border-white")
-                    )}
-                  >
-                    <Scissors className="w-4 h-4 transition-transform group-hover:scale-110" />
-                    {isCode ? t.refinements.CodeConcise : (isImage ? t.refinements.ImageConcise : t.refinements.Concise)}
-                  </button>
-                  <button
-                    onClick={() => onRefine("technician")}
-                    className={cn(
-                      "group px-6 py-3 border rounded-xl text-[12px] font-black uppercase tracking-[0.15em] transition-all flex items-center gap-2 shadow-sm",
-                      isCode 
-                        ? "bg-black text-green-500 border-green-500/20 hover:border-green-500" 
-                        : (isImage 
-                            ? "bg-white text-purple-600 border-purple-200 hover:border-purple-500"
-                            : "bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-white/10 hover:border-black dark:hover:border-white")
-                    )}
-                  >
-                    <Zap className={cn("w-4 h-4 transition-transform group-hover:scale-110 group-hover:text-amber-500")} />
-                    {isCode ? t.refinements.CodeTechnician : (isImage ? t.refinements.ImageTechnician : t.refinements.Technician)}
-                  </button>
+                  {refinementActions.map((action) => (
+                    <button
+                      key={action.type}
+                      onClick={() => onRefine(action.type)}
+                      className={cn(
+                        "group px-4 md:px-5 py-3 border rounded-xl text-[11px] md:text-[12px] font-black uppercase tracking-[0.12em] md:tracking-[0.15em] transition-all flex items-center gap-2 shadow-sm",
+                        isCode
+                          ? "bg-black text-green-500 border-green-500/20 hover:border-green-500"
+                          : (isImage
+                              ? "bg-white text-purple-600 border-purple-200 hover:border-purple-500"
+                              : "bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-white/10 hover:border-black dark:hover:border-white")
+                      )}
+                    >
+                      {action.icon}
+                      {action.label}
+                    </button>
+                  ))}
                 </motion.div>
               )}
             </AnimatePresence>

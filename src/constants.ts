@@ -2,19 +2,19 @@ import { Platform } from "./types";
 
 export const PLATFORMS: Platform[] = [
   "ChatGPT",
-  "Gemini",
   "Claude",
+  "Gemini",
   "Copilot",
   "Perplexity",
 ];
 
 export const CODE_PLATFORMS: Platform[] = [
   "Claude Code",
-  "Aider",
-  "Windsurf",
   "Cursor",
-  "Bolt.new",
+  "Windsurf",
   "Codex",
+  "Aider",
+  "Bolt.new",
 ];
 
 export const IMAGE_PLATFORMS: Platform[] = [

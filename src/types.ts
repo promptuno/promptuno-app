@@ -17,6 +17,13 @@ export type AppMode = "Forge" | "Code" | "Image";
 
 export type Language = "en" | "fr" | "ar" | "tr" | "ru";
 
+export type RefinementType =
+  | "concise"
+  | "technician"
+  | "corporate"
+  | "creative"
+  | "adapt";
+
 export interface GeneratedPrompt {
   isNonsense?: boolean;
   goal: string;

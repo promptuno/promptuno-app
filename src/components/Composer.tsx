@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { ArrowUp, Mic, MicOff, Image as ImageIcon, Rocket } from "lucide-react";
+import { ArrowUp, ChevronDown, Mic, MicOff, Image as ImageIcon, Rocket } from "lucide-react";
 import { cn } from "../lib/utils";
 import { AppMode, Platform } from "../types";
 import { PLATFORMS, CODE_PLATFORMS, IMAGE_PLATFORMS } from "../constants";
@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Zap, Palette } from "lucide-react";
 import { Language } from "../types";
 import { translations } from "../lib/translations";
+import { modelGuidance, PRIMARY_MODEL_LIMIT } from "../lib/productLayers";
 
 interface ComposerProps {
   value: string;
@@ -18,6 +19,8 @@ interface ComposerProps {
   onPlatformChange: (platform: Platform) => void;
   mode: AppMode;
   isLimitReached?: boolean;
+  usageRemaining?: number;
+  usageLimit?: number;
   onUpgrade?: () => void;
   lang: Language;
 }
@@ -32,6 +35,8 @@ export const Composer: React.FC<ComposerProps> = ({
   onPlatformChange,
   mode,
   isLimitReached,
+  usageRemaining = 0,
+  usageLimit = 5,
   onUpgrade,
   lang,
 }) => {
@@ -41,12 +46,17 @@ export const Composer: React.FC<ComposerProps> = ({
   const [isListening, setIsListening] = useState(false);
   const [isAttached, setIsAttached] = useState(false);
   const [isLimitDismissed, setIsLimitDismissed] = useState(false);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [placeholderText, setPlaceholderText] = useState("");
   const recognitionRef = useRef<any>(null);
 
   const currentPlatforms = mode === "Code" 
     ? CODE_PLATFORMS 
     : (mode === "Image" ? IMAGE_PLATFORMS : PLATFORMS);
+  const primaryPlatforms = currentPlatforms.slice(0, PRIMARY_MODEL_LIMIT);
+  const secondaryPlatforms = currentPlatforms.slice(PRIMARY_MODEL_LIMIT);
+  const isSecondarySelected = secondaryPlatforms.includes(platform);
+  const usagePercent = Math.max(0, Math.min(100, (usageRemaining / usageLimit) * 100));
   const createForLabel = lang === "en"
     ? mode === "Code"
       ? "Create an architecture for"
@@ -177,6 +187,11 @@ export const Composer: React.FC<ComposerProps> = ({
     }
   };
 
+  const selectPlatform = (nextPlatform: Platform) => {
+    onPlatformChange(nextPlatform);
+    setIsMoreOpen(false);
+  };
+
   return (
     <form 
       onSubmit={(e) => { e.preventDefault(); onSend(); }}
@@ -209,11 +224,14 @@ export const Composer: React.FC<ComposerProps> = ({
 
         {/* Limit Overlay */}
         {isLimitReached && !isLimitDismissed && (
-          <div className="absolute inset-0 z-50 backdrop-blur-xl bg-white/10 dark:bg-black/10 flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
-            <div className="bg-white dark:bg-neutral-900 p-8 rounded-[32px] shadow-2xl border border-neutral-100 dark:border-white/10 max-w-sm">
+          <div className="absolute inset-0 z-50 backdrop-blur-xl bg-white/20 dark:bg-black/20 flex flex-col items-center justify-center p-5 text-center animate-in fade-in duration-500">
+            <div className="bg-white dark:bg-neutral-900 p-6 md:p-8 rounded-[28px] md:rounded-[32px] shadow-2xl border border-neutral-100 dark:border-white/10 max-w-sm">
               <Zap className="w-10 h-10 text-indigo-500 mx-auto mb-4" />
               <h3 className="text-xl font-black uppercase tracking-tight mb-2">{t.labels.LimitReached}</h3>
               <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">{t.labels.LimitDescription}</p>
+              <p className="text-[11px] text-neutral-400 dark:text-neutral-500 font-bold uppercase tracking-[0.18em] mb-6">
+                Built for people who use AI seriously.
+              </p>
               
               <div className="flex flex-col gap-3">
                 <button
@@ -258,14 +276,14 @@ export const Composer: React.FC<ComposerProps> = ({
             {createForLabel}
           </span>
           <div className={cn(
-            "flex items-center gap-1 p-1 rounded-2xl border overflow-x-auto no-scrollbar w-full snap-x",
+            "relative flex items-center gap-1 p-1 rounded-2xl border overflow-x-auto no-scrollbar w-full snap-x",
             mode === "Code" ? "bg-green-500/5 border-green-500/20" : (mode === "Image" ? "bg-purple-500/5 border-purple-500/20" : "bg-neutral-100/50 dark:bg-white/5 border-neutral-200/50 dark:border-white/5")
           )}>
-            {currentPlatforms.map((p) => (
+            {primaryPlatforms.map((p) => (
               <button
                 key={p}
                 type="button"
-                onClick={() => onPlatformChange(p as Platform)}
+                onClick={() => selectPlatform(p as Platform)}
                 className={cn(
                   "relative shrink-0 snap-center px-4 py-2 text-[11px] font-bold rounded-xl transition-all duration-300",
                   platform === p
@@ -286,7 +304,71 @@ export const Composer: React.FC<ComposerProps> = ({
                 <span className="relative z-10">{p}</span>
               </button>
             ))}
+            {secondaryPlatforms.length > 0 && (
+              <div className="relative shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsMoreOpen((open) => !open)}
+                  className={cn(
+                    "relative px-3 py-2 text-[11px] font-bold rounded-xl transition-all duration-300 flex items-center gap-1.5",
+                    isSecondarySelected
+                      ? (mode === "Code" ? "text-green-400" : (mode === "Image" ? "text-purple-600 dark:text-purple-300" : "text-black dark:text-white"))
+                      : (mode === "Code" ? "text-green-900/50 hover:text-green-700" : (mode === "Image" ? "text-purple-900/40 hover:text-purple-600" : "text-neutral-400 hover:text-neutral-600 dark:text-neutral-600 dark:hover:text-neutral-400"))
+                  )}
+                >
+                  {isSecondarySelected && (
+                    <motion.div
+                      layoutId="platform-pill"
+                      className={cn(
+                        "absolute inset-0 shadow-sm rounded-xl -z-0 border",
+                        mode === "Code" ? "bg-green-500/10 border-green-500/30" : (mode === "Image" ? "bg-purple-500/10 border-purple-500/30" : "bg-white dark:bg-neutral-800 border-neutral-100 dark:border-white/10")
+                      )}
+                      transition={{ type: "spring", bounce: 0.1, duration: 0.5 }}
+                    />
+                  )}
+                  <span className="relative z-10">{isSecondarySelected ? platform : "More"}</span>
+                  <ChevronDown className={cn("relative z-10 w-3 h-3 transition-transform", isMoreOpen && "rotate-180")} />
+                </button>
+              </div>
+            )}
           </div>
+          <AnimatePresence>
+            {isMoreOpen && secondaryPlatforms.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                className={cn(
+                  "flex flex-wrap gap-2 rounded-2xl border p-2",
+                  mode === "Code" ? "bg-green-500/5 border-green-500/20" : (mode === "Image" ? "bg-purple-500/5 border-purple-500/20" : "bg-white/70 dark:bg-white/[0.03] border-neutral-100 dark:border-white/5")
+                )}
+              >
+                {secondaryPlatforms.map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => selectPlatform(p as Platform)}
+                    className={cn(
+                      "px-3 py-2 rounded-xl text-[11px] font-bold transition-colors",
+                      platform === p
+                        ? (mode === "Code" ? "bg-green-500/10 text-green-400" : "bg-neutral-900 dark:bg-white text-white dark:text-black")
+                        : (mode === "Code" ? "text-green-500/60 hover:bg-green-500/5" : "text-neutral-500 hover:bg-neutral-100 dark:hover:bg-white/5")
+                    )}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+          {modelGuidance[platform] && (
+            <p className={cn(
+              "text-[11px] leading-relaxed font-medium text-center sm:text-left",
+              mode === "Code" ? "text-green-500/45" : (mode === "Image" ? "text-purple-500/60" : "text-neutral-400 dark:text-neutral-500")
+            )}>
+              {modelGuidance[platform]}
+            </p>
+          )}
         </div>
 
         <div className="flex items-start gap-3 md:gap-4">
@@ -326,6 +408,39 @@ export const Composer: React.FC<ComposerProps> = ({
             <button type="button" onClick={() => setIsAttached(false)} className={cn("ml-2", mode === "Code" ? "text-green-700" : (mode === "Image" ? "text-purple-700" : "text-indigo-400 hover:text-indigo-600"))}>×</button>
           </div>
         )}
+
+        <div className={cn(
+          "mt-5 rounded-2xl border p-3 flex items-center justify-between gap-3",
+          mode === "Code" ? "bg-green-500/5 border-green-500/20" : (mode === "Image" ? "bg-purple-500/5 border-purple-500/20" : "bg-neutral-50/70 dark:bg-white/[0.03] border-neutral-100 dark:border-white/5")
+        )}>
+          <div>
+            <div className={cn(
+              "text-[10px] font-black uppercase tracking-[0.18em]",
+              mode === "Code" ? "text-green-500/60" : (mode === "Image" ? "text-purple-500/70" : "text-neutral-400 dark:text-neutral-500")
+            )}>
+              Free prompts left
+            </div>
+            <div className="text-[13px] font-black text-neutral-900 dark:text-white mt-0.5">
+              {usageRemaining} of {usageLimit}
+            </div>
+          </div>
+          <div className="w-28 h-2 rounded-full bg-neutral-200/70 dark:bg-white/10 overflow-hidden">
+            <motion.div
+              initial={false}
+              animate={{ width: `${usagePercent}%` }}
+              className={cn(
+                "h-full rounded-full",
+                usageRemaining <= 1
+                  ? "bg-red-500"
+                  : mode === "Code"
+                    ? "bg-green-500"
+                    : mode === "Image"
+                      ? "bg-purple-500"
+                      : "bg-black dark:bg-white"
+              )}
+            />
+          </div>
+        </div>
 
         <div className={cn(
           "flex flex-col sm:flex-row items-stretch sm:items-center justify-between mt-6 md:mt-8 pt-4 md:pt-6 border-t gap-4",
