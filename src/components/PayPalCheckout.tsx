@@ -1,5 +1,5 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
-import { Check, CreditCard, Lock, ShieldCheck } from "lucide-react";
+import { Check, Lock, ShieldCheck } from "lucide-react";
 import { motion } from "motion/react";
 import {
   PAYPAL_CLIENT_ID,
@@ -158,19 +158,7 @@ export const PayPalCheckout: React.FC = () => {
   }, [buttonContainerId, checkoutMode]);
 
   return (
-    <div className="rounded-[24px] border border-white/10 bg-white/[0.06] dark:bg-black/10 p-4 space-y-4">
-      <div className="flex items-start gap-3">
-        <div className="w-9 h-9 rounded-2xl bg-white text-neutral-950 dark:bg-neutral-950 dark:text-white flex items-center justify-center shadow-sm">
-          <CreditCard className="w-4 h-4" />
-        </div>
-        <div>
-          <div className="text-[11px] font-black uppercase tracking-[0.18em] opacity-70">PayPal checkout</div>
-          <p className="text-[13px] leading-relaxed opacity-80 mt-1">
-            Pay {PRO_PLAN_PRICE.display} {PRO_PLAN_PRICE.currency} for {PRO_PLAN_PRICE.name}. Payment is routed to {PAYPAL_PAYEE_EMAIL}.
-          </p>
-        </div>
-      </div>
-
+    <div className="space-y-3">
       {PAYPAL_CLIENT_ID && state !== "error" ? (
         <div className="space-y-3">
           {state === "loading" && (
@@ -189,7 +177,7 @@ export const PayPalCheckout: React.FC = () => {
             type="submit"
             className="w-full py-4 rounded-2xl bg-white dark:bg-neutral-950 text-neutral-950 dark:text-white font-black uppercase tracking-[0.12em] text-[12px] shadow-lg hover:scale-[1.01] active:scale-95 transition-all"
           >
-            Pay with PayPal
+            Pay {PRO_PLAN_PRICE.display} with PayPal
           </button>
         </form>
       )}
@@ -211,9 +199,9 @@ export const PayPalCheckout: React.FC = () => {
         </motion.div>
       )}
 
-      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] opacity-60">
+      <div className="flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] opacity-60">
         <Lock className="w-3.5 h-3.5" />
-        Secure checkout handled by PayPal
+        Secure PayPal checkout
       </div>
     </div>
   );
