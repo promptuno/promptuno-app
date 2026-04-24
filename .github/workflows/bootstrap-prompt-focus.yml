@@ -1,13 +1,16 @@
 name: Bootstrap Prompt Focus
 
 on:
-  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/bootstrap-prompt-focus.yml
 
 permissions:
   contents: write
 
 jobs:
   upload-project:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
