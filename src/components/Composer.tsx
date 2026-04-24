@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { ArrowUp, Braces, Image as ImageIcon, Mic, MicOff, Palette, Rocket, TerminalSquare, X } from "lucide-react";
+import { ArrowUp, Image as ImageIcon, Mic, MicOff, Rocket, Sparkles, TerminalSquare, X } from "lucide-react";
 import { cn } from "../lib/utils";
 import { AppMode, Platform } from "../types";
 import { PLATFORMS } from "../constants";
@@ -28,6 +28,81 @@ interface ComposerProps {
   onMobileComposerOpen?: () => void;
   onMobileComposerClose?: () => void;
 }
+
+const getModeIcon = (mode: AppMode) => {
+  if (mode === "Image") return <ImageIcon className="w-6 h-6" />;
+  if (mode === "Vibe") return <TerminalSquare className="w-6 h-6" />;
+  return <Sparkles className="w-6 h-6" />;
+};
+
+const AmbientVisuals: React.FC<{ mode: AppMode }> = ({ mode }) => {
+  if (mode === "Image") {
+    return (
+      <div className="pointer-events-none absolute inset-0 hidden overflow-hidden opacity-55 md:block">
+        {[
+          "top-10 right-10 w-24 h-32 from-amber-300/28 via-pink-300/12 to-white/0",
+          "bottom-12 left-10 w-28 h-20 from-orange-300/18 via-amber-300/10 to-white/0",
+        ].map((card, index) => (
+          <motion.div
+            key={card}
+            initial={false}
+            animate={{ y: [0, index % 2 ? -10 : 10, 0], rotate: [index - 1, index + 1, index - 1] }}
+            transition={{ duration: 7 + index, repeat: Infinity, ease: "easeInOut" }}
+            className={cn(
+              "absolute rounded-[28px] border border-white/30 dark:border-white/10 bg-gradient-to-br shadow-[0_24px_80px_rgba(0,0,0,0.08)] dark:shadow-[0_24px_90px_rgba(0,0,0,0.18)] backdrop-blur-2xl",
+              card
+            )}
+          >
+            <div className="absolute inset-3 rounded-[22px] border border-white/20 dark:border-white/10 bg-white/35 dark:bg-white/[0.06]" />
+            <div className="absolute inset-x-5 top-5 h-2 rounded-full bg-white/60 dark:bg-white/15" />
+            <div className="absolute inset-x-5 top-11 h-16 rounded-[18px] bg-white/35 dark:bg-white/[0.06]" />
+            <div className="absolute left-5 right-12 bottom-7 h-2 rounded-full bg-white/50 dark:bg-white/12" />
+          </motion.div>
+        ))}
+      </div>
+    );
+  }
+
+  if (mode === "Vibe") {
+    return (
+      <div className="pointer-events-none absolute inset-0 hidden overflow-hidden opacity-45 md:block">
+        <div className="absolute right-8 top-8 w-[58%] rounded-[28px] border border-emerald-400/15 bg-[#07120f]/85 shadow-[0_30px_120px_rgba(7,18,15,0.45)]">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-emerald-400/10">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-300/70" />
+            <span className="w-2.5 h-2.5 rounded-full bg-cyan-300/60" />
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-300/60" />
+            <span className="ml-3 text-[9px] font-black uppercase tracking-[0.22em] text-emerald-200/55">
+              vibe-code.prompt
+            </span>
+          </div>
+          <div className="px-4 py-4 space-y-2 text-[10px] font-semibold text-emerald-200/65">
+            <div>$ define-stack --intent "ship a premium frontend"</div>
+            <div>$ add-constraints --responsive --fast --polished</div>
+            <div>$ shape-prompt --platform "AI model"</div>
+          </div>
+        </div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(52,211,153,0.06)_1px,transparent_1px)] bg-[length:100%_24px]" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <motion.div
+        initial={false}
+        animate={{ x: [0, 24, 0], y: [0, 8, 0] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-8 right-10 h-36 w-36 rounded-full bg-violet-400/10 blur-3xl"
+      />
+      <motion.div
+        initial={false}
+        animate={{ x: [0, -18, 0], y: [0, -12, 0] }}
+        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute bottom-6 left-6 h-28 w-28 rounded-full bg-sky-400/10 blur-3xl"
+      />
+    </div>
+  );
+};
 
 export const Composer: React.FC<ComposerProps> = ({
   value,
@@ -77,23 +152,17 @@ export const Composer: React.FC<ComposerProps> = ({
             "Turn my rough concept into a polished product-render image prompt...",
             "Build an image prompt with lighting, lens, style, and composition...",
           ]
-        : mode === "Code"
+        : mode === "Vibe"
           ? [
-              `Create a stronger ${platform} coding prompt for a full-stack feature build...`,
-              "Turn my bug report into a precise debugging prompt with acceptance criteria...",
-              "Create a code prompt with stack, constraints, edge cases, and output format...",
+              `Create a ${platform} vibe-coding prompt for a polished SaaS landing page build...`,
+              "Turn my app idea into a terminal-clean build prompt with stack, UX goals, and constraints...",
+              "Create a coding prompt with feature scope, edge cases, polish targets, and exact output format...",
             ]
-          : mode === "Vibe"
-            ? [
-                "Build a prompt that sharpens this brand voice into a confident premium tone...",
-                "Turn my rough idea into a prompt for naming, mood, and creative direction...",
-                "Create a prompt that helps the AI capture the exact aesthetic and feel...",
-              ]
-            : [
-                `Create a stronger ${platform} prompt for a startup launch plan...`,
-                `Turn my rough idea into a detailed ${platform} prompt...`,
-                "Create a prompt that gives step-by-step, premium answers...",
-              ];
+          : [
+              `Create a stronger ${platform} prompt for a startup launch plan...`,
+              `Turn my rough idea into a detailed ${platform} prompt...`,
+              "Create a prompt that gives step-by-step, premium answers...",
+            ];
 
     let exampleIndex = 0;
     let charIndex = 0;
@@ -197,13 +266,12 @@ export const Composer: React.FC<ComposerProps> = ({
         <div className={cn("absolute inset-x-0 top-0 h-1 opacity-90", theme.accentGradient)} />
         <div className={cn("absolute -top-16 -right-10 w-40 h-40 rounded-full blur-3xl", theme.orbPrimary)} />
         <div className={cn("absolute -bottom-16 -left-10 w-40 h-40 rounded-full blur-3xl", theme.orbSecondary)} />
+        <AmbientVisuals mode={mode} />
         {isLimitReached && !isLimitDismissed && (
           <div className="absolute inset-0 z-50 backdrop-blur-xl bg-white/20 dark:bg-black/20 flex flex-col items-center justify-center p-5 text-center animate-in fade-in duration-500">
             <div className="bg-white dark:bg-neutral-900 p-6 md:p-8 rounded-[28px] md:rounded-[32px] shadow-2xl border border-neutral-100 dark:border-white/10 max-w-sm">
               <div className={cn("w-12 h-12 rounded-3xl flex items-center justify-center mx-auto mb-4", theme.accentSoft, theme.accentBorder, "border")}>
-                <div className={theme.accentText}>
-                  {mode === "CMD" ? <TerminalSquare className="w-6 h-6" /> : mode === "Image" ? <ImageIcon className="w-6 h-6" /> : mode === "Code" ? <Braces className="w-6 h-6" /> : <Palette className="w-6 h-6" />}
-                </div>
+                <div className={theme.accentText}>{getModeIcon(mode)}</div>
               </div>
               <h3 className="text-xl font-black uppercase tracking-tight mb-2">{t.labels.LimitReached}</h3>
               <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-5">{t.labels.LimitDescription}</p>
@@ -248,32 +316,39 @@ export const Composer: React.FC<ComposerProps> = ({
         <div className="flex flex-col gap-3 mb-5 md:mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <span className="text-[11px] md:text-[14px] font-black uppercase tracking-[0.16em] md:tracking-[0.2em] text-neutral-400 dark:text-neutral-600 text-center sm:text-left">
-              {theme.label} prompts for
+              {theme.label} for
             </span>
             <span className="text-[10px] font-black uppercase tracking-[0.16em] text-neutral-400 dark:text-neutral-500 text-center sm:text-right">
               {theme.description}
             </span>
           </div>
 
-          <div className="relative grid grid-cols-4 gap-1 p-1 rounded-2xl border bg-neutral-100/50 dark:bg-white/5 border-neutral-200/50 dark:border-white/5">
+          <div className="relative grid grid-cols-4 gap-1 p-1.5 rounded-[20px] border bg-white/35 dark:bg-white/5 border-neutral-200/60 dark:border-white/5 backdrop-blur-2xl shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] dark:shadow-none">
             {PLATFORMS.map((p) => (
               <button
                 key={p}
                 type="button"
                 onClick={() => onPlatformChange(p)}
                 className={cn(
-                  "relative min-w-0 px-2 sm:px-4 py-2.5 text-[10px] sm:text-[11px] font-bold rounded-xl transition-all duration-300",
+                  "relative min-w-0 px-2 sm:px-4 py-2.5 text-[10px] sm:text-[11px] font-bold rounded-[16px] transition-all duration-500 overflow-hidden",
                   platform === p
                     ? "text-black dark:text-white"
                     : "text-neutral-400 hover:text-neutral-600 dark:text-neutral-600 dark:hover:text-neutral-400"
                 )}
               >
                 {platform === p && (
-                  <motion.div
-                    layoutId="platform-pill"
-                    className={cn("absolute inset-0 shadow-sm rounded-xl -z-0 border bg-white dark:bg-neutral-800", theme.accentBorder)}
-                    transition={{ type: "spring", bounce: 0.1, duration: 0.5 }}
-                  />
+                  <>
+                    <motion.div
+                      layoutId="platform-pill"
+                      className={cn("absolute inset-0 shadow-sm rounded-[16px] -z-0 border bg-white/95 dark:bg-neutral-900/95", theme.accentBorder)}
+                      transition={{ type: "spring", bounce: 0.18, duration: 0.7 }}
+                    />
+                    <motion.div
+                      layoutId="platform-sheen"
+                      className="absolute inset-x-3 top-1 h-5 rounded-full bg-white/50 dark:bg-white/[0.05] blur-xl -z-0"
+                      transition={{ type: "spring", bounce: 0.16, duration: 0.66 }}
+                    />
+                  </>
                 )}
                 <span className="relative z-10 truncate block">{p}</span>
               </button>
@@ -283,12 +358,10 @@ export const Composer: React.FC<ComposerProps> = ({
           {modelGuidance[platform] && (
             <p className="text-[11px] leading-relaxed font-medium text-center sm:text-left text-neutral-400 dark:text-neutral-500">
               {mode === "Image"
-                  ? `Use ${platform} to sharpen subject, style, lighting, composition, and visual constraints.`
-                  : mode === "Code"
-                    ? `${platform} prompts work best with stack details, acceptance criteria, edge cases, and exact output format.`
-                    : mode === "Vibe"
-                    ? `${platform} can sharpen tone, mood, brand direction, and aesthetic clarity.`
-                    : modelGuidance[platform]}
+                ? `Use ${platform} to sharpen subject, style, lighting, composition, and visual constraints.`
+                : mode === "Vibe"
+                  ? `${platform} works best here with stack details, UX goals, constraints, and exact deliverables.`
+                  : modelGuidance[platform]}
             </p>
           )}
         </div>
@@ -301,13 +374,11 @@ export const Composer: React.FC<ComposerProps> = ({
           >
             <div className="flex items-start gap-3">
               <div className={cn("w-11 h-11 rounded-2xl bg-white dark:bg-neutral-900 border flex items-center justify-center shadow-sm", theme.accentBorder)}>
-                <div className={theme.accentText}>
-                  {mode === "CMD" ? <TerminalSquare className="w-4 h-4" /> : mode === "Image" ? <ImageIcon className="w-4 h-4" /> : mode === "Code" ? <Braces className="w-4 h-4" /> : <Palette className="w-4 h-4" />}
-                </div>
+                <div className={theme.accentText}>{getModeIcon(mode)}</div>
               </div>
               <div className="min-w-0 flex-1">
                 <div className={cn("text-[11px] font-black uppercase tracking-[0.16em]", theme.accentText)}>
-                  {theme.label} prompts
+                  {theme.label}
                 </div>
                 <div className="mt-2 text-[15px] font-semibold text-neutral-900 dark:text-white leading-relaxed">
                   {placeholderText || t.placeholders[mode].replace("{platform}", platform)}
@@ -320,16 +391,17 @@ export const Composer: React.FC<ComposerProps> = ({
           </button>
         ) : (
           <div className="flex items-start gap-3 md:gap-4">
-            <div className={cn("mt-1", theme.accentText)}>
-              {mode === "CMD" ? <TerminalSquare className="w-6 h-6" /> : mode === "Image" ? <ImageIcon className="w-6 h-6" /> : mode === "Code" ? <Braces className="w-6 h-6" /> : <Palette className="w-6 h-6" />}
-            </div>
+            <div className={cn("mt-1", theme.accentText)}>{getModeIcon(mode)}</div>
             <textarea
               ref={textareaRef}
               value={value}
               onChange={(e) => onChange(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={placeholderText || t.placeholders[mode].replace("{platform}", platform)}
-              className="flex-1 bg-transparent border-none focus:ring-0 resize-none text-[17px] md:text-[22px] font-medium leading-relaxed p-0 min-h-[150px] md:min-h-[140px] max-h-[500px] text-neutral-900 dark:text-white placeholder-neutral-200 dark:placeholder-neutral-800"
+              className={cn(
+                "flex-1 bg-transparent border-none focus:ring-0 resize-none text-[17px] md:text-[22px] font-medium leading-relaxed p-0 min-h-[150px] md:min-h-[140px] max-h-[500px] placeholder-neutral-200 dark:placeholder-neutral-800",
+                mode === "Vibe" ? "text-emerald-950 dark:text-emerald-100 font-mono" : "text-neutral-900 dark:text-white"
+              )}
               disabled={disabled || isLimitReached}
             />
             {isMobileViewport && (

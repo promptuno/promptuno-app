@@ -4,7 +4,7 @@ export type Platform =
   | "Claude"
   | "Copilot";
 
-export type AppMode = "CMD" | "Image" | "Code" | "Vibe";
+export type AppMode = "Prompt" | "Image" | "Vibe";
 
 export type Language = "en" | "fr" | "ar" | "tr" | "ru";
 

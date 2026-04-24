@@ -39,7 +39,7 @@ export const Paywall: React.FC<PaywallProps> = ({ isOpen, onClose }) => {
               {[
                 "Prompt generation without interruption",
                 "Continue creating across the web app and Chrome",
-                "Premium refinements for stronger prompts",
+                "Prompt, image, and vibe code prompting",
                 "Future saved prompts, prompt packs, and workflow libraries",
               ].map((feature, i) => (
                 <div key={i} className="flex items-center gap-3">

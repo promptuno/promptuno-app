@@ -52,7 +52,7 @@ function getKeywords(request: string) {
     .slice(0, 5);
 }
 
-export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode = "CMD", lang, request = "" }) => {
+export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode = "Prompt", lang, request = "" }) => {
   const t = translations[lang];
   const [currentStep, setCurrentStep] = useState(0);
   const keywords = getKeywords(request);
@@ -63,7 +63,7 @@ export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode =
   const steps = [
     { icon: Search, label: "Reading Your Intent", sub: `Detecting: ${keywordText}` },
     { icon: ScanSearch, label: `Mapping ${theme.label} Prompt Context`, sub: t.loading.Scanning.replace("{platform}", platform) },
-    { icon: Database, label: `Structuring ${theme.label} Prompt`, sub: t.loading.Architecting },
+    { icon: Database, label: mode === "Vibe" ? "Structuring Build Prompt" : `Structuring ${theme.label} Prompt`, sub: t.loading.Architecting },
     { icon: Cpu, label: "Sharpening Output", sub: t.loading.Optimizing },
     { icon: BrainCircuit, label: "Ready Soon", sub: "Polishing the final answer" },
   ];

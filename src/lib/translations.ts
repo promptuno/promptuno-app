@@ -2,16 +2,14 @@ import { Language } from "../types";
 
 const englishCopy = {
   modes: {
-    CMD: "CMD",
+    Prompt: "Prompt",
     Image: "Image",
-    Code: "Code",
-    Vibe: "Vibe",
+    Vibe: "Vibe Code",
   },
   placeholders: {
-    CMD: "Describe what you want the AI to do. Promptuno will engineer the best prompt for {platform}...",
+    Prompt: "Describe what you want the AI to do. Promptuno will engineer a clean, strong prompt for {platform}...",
     Image: "Describe the subject, style, mood, composition, and details you want in the final image prompt...",
-    Code: "Describe the feature, bug, stack, constraints, and output you want the coding prompt to produce...",
-    Vibe: "Describe the tone, brand feel, creative direction, or aesthetic you want Promptuno to sharpen...",
+    Vibe: "Describe the feature, product idea, stack, style, and constraints you want in a terminal-clean vibe coding prompt...",
   },
   buttons: {
     Generate: "Generate Prompt",
@@ -22,10 +20,7 @@ const englishCopy = {
   },
   labels: {
     CreateFor: "Optimize for",
-    PromptMode: "Prompt focus",
-    WriteMode: "Prompt focus",
     Prompt: "prompt",
-    Writing: "prompt",
     WaitMessage: "Please wait a moment",
     Engineering: "Preparing {platform}",
     Forging: "Generating...",

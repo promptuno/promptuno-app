@@ -174,7 +174,7 @@ function buildRefineQuestions(input: string, mode: AppMode, platform: Platform) 
 }
 
 export default function App() {
-  const [mode, setMode] = useState<AppMode>("CMD");
+  const [mode, setMode] = useState<AppMode>("Prompt");
   const [platform, setPlatform] = useState<Platform>("ChatGPT");
   const [inputValue, setInputValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -256,11 +256,9 @@ export default function App() {
       const modeGuidance =
         mode === "Image"
           ? "Specialize in image-generation prompts. Include subject, composition, style, lighting, camera feel, texture, color direction, and useful exclusions when appropriate."
-          : mode === "Code"
-            ? "Specialize in coding prompts. Include role, stack, constraints, inputs, outputs, acceptance criteria, edge cases, and debugging or implementation guidance where useful."
-            : mode === "Vibe"
-              ? "Specialize in aesthetic, brand, tone, and creative-direction prompts. Clarify mood, voice, energy, references, and desired emotional effect."
-              : "Specialize in high-performance command prompts for research, strategy, execution, and communication.";
+          : mode === "Vibe"
+            ? "Specialize in vibe-coding prompts. Include role, stack, UX intent, constraints, expected deliverables, acceptance criteria, and a crisp terminal-like structure that still reads premium and modern."
+            : "Specialize in high-performance prompts for research, strategy, execution, communication, and structured thinking.";
 
       const systemInstruction = `You are Promptuno, an AI Prompt Architect.
 Your mission is to transform user intent into elite-tier prompts for ${platform}.
@@ -285,7 +283,7 @@ JSON structure:
 
       const aiPromise = generatePromptResponse(
         systemInstruction,
-        `User said: "${inputToUse}". Generate the best ${mode.toLowerCase()} prompt for ${platform}.`,
+        `User said: "${inputToUse}". Generate the best ${mode === "Vibe" ? "vibe coding" : mode.toLowerCase()} prompt for ${platform}.`,
       );
 
       // 2. Short 1s buffer for the "Forging" button state to feel reactive
@@ -435,9 +433,9 @@ JSON structure:
                     transition={{ duration: 0.5 }}
                     className="w-full"
                   >
-                    <Composer 
-                      value={inputValue} 
-                      onChange={handleInputChange} 
+                    <Composer
+                      value={inputValue}
+                      onChange={handleInputChange}
                       onSend={() => handleGenerate()}
                       disabled={isGenerating || isAnalyzing}
                       isGenerating={isGenerating || isAnalyzing}

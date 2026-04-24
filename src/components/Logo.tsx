@@ -8,15 +8,13 @@ interface LogoProps {
   showText?: boolean;
 }
 
-export const Logo: React.FC<LogoProps> = ({ className, mode = "CMD", showText = true }) => {
+export const Logo: React.FC<LogoProps> = ({ className, mode = "Prompt", showText = true }) => {
   const colors =
     mode === "Image"
       ? ["#F59E0B", "#EC4899", "#FB7185"]
-      : mode === "Code"
-        ? ["#22D3EE", "#3B82F6", "#10B981"]
-        : mode === "Vibe"
-          ? ["#D946EF", "#EC4899", "#FB923C"]
-          : ["#A855F7", "#8B5CF6", "#3B82F6"];
+      : mode === "Vibe"
+        ? ["#34D399", "#22D3EE", "#3B82F6"]
+        : ["#A855F7", "#8B5CF6", "#3B82F6"];
 
   return (
     <div className={cn("flex items-center gap-2 group shrink-0", className)}>

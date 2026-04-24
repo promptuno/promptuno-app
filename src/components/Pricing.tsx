@@ -10,10 +10,10 @@ export const Pricing: React.FC = () => {
     {
       name: "Free",
       price: "$0",
-      description: "Start with Promptuno's core prompt categories before upgrading.",
+      description: "Start with Promptuno's three core prompt categories before upgrading.",
       features: [
         "5 free generations across web and Chrome",
-        "CMD, image, code, and vibe prompts",
+        "Prompt, image, and vibe code prompts",
         "Chrome extension included",
         "Primary models: ChatGPT, Claude, Gemini, and Copilot",
       ],
@@ -26,7 +26,7 @@ export const Pricing: React.FC = () => {
       description: "Built for people who work with AI seriously.",
       features: [
         "Continue generating prompts without interruption",
-        "Heavier usage across the web app and Chrome extension",
+        "Heavier usage across the web app and Chrome",
         "Premium refinements for tone, depth, and platform fit",
         "Future prompt history, saved prompt packs, templates, and workflow layers",
       ],
@@ -46,10 +46,13 @@ export const Pricing: React.FC = () => {
             transition={{ delay: i * 0.1 }}
             className={`relative p-6 md:p-8 rounded-[28px] md:rounded-[32px] border ${
               plan.current
-                ? "bg-white dark:bg-neutral-900 border-neutral-100 dark:border-neutral-800 shadow-sm"
-                : "bg-neutral-900 dark:bg-neutral-100 dark:text-neutral-900 border-neutral-800 dark:border-neutral-200 text-white shadow-xl md:scale-105"
+                ? "bg-white/85 dark:bg-neutral-900/85 border-neutral-100 dark:border-neutral-800 shadow-[0_18px_55px_rgba(0,0,0,0.06)]"
+                : "bg-[linear-gradient(180deg,rgba(17,24,39,0.96),rgba(10,10,10,0.96))] dark:bg-[linear-gradient(180deg,rgba(250,250,250,0.96),rgba(241,241,241,0.96))] dark:text-neutral-900 border-white/10 dark:border-neutral-200 text-white shadow-[0_22px_80px_rgba(0,0,0,0.24)]"
             }`}
           >
+            {!plan.current && (
+              <div className="absolute inset-x-8 top-0 h-14 rounded-full bg-white/10 dark:bg-white/60 blur-2xl opacity-60 pointer-events-none" />
+            )}
             <div className="space-y-6">
               <div>
                 <div className="text-sm font-bold uppercase tracking-widest opacity-60">{plan.name}</div>
@@ -74,7 +77,17 @@ export const Pricing: React.FC = () => {
                   {plan.cta}
                 </div>
               ) : (
-                <PayPalCheckout />
+                <div className="space-y-4">
+                  <div className="rounded-[22px] border border-white/10 dark:border-neutral-200 bg-white/5 dark:bg-white/70 px-4 py-3">
+                    <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white/45 dark:text-neutral-500">
+                      Promptuno Pro
+                    </div>
+                    <div className="mt-1 text-[13px] leading-relaxed text-white/75 dark:text-neutral-600">
+                      A calm monthly upgrade for uninterrupted prompt creation on the web and in Chrome.
+                    </div>
+                  </div>
+                  <PayPalCheckout />
+                </div>
               )}
             </div>
           </motion.div>

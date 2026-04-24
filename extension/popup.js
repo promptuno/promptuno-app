@@ -1,5 +1,5 @@
 const state = {
-  mode: "cmd",
+  mode: "prompt",
   platform: "ChatGPT",
   output: ""
 };
@@ -25,9 +25,9 @@ const els = {
 };
 
 const modeMeta = {
-  cmd: {
-    label: "CMD",
-    hint: "Core prompt setup for everyday prompting.",
+  prompt: {
+    label: "Prompt",
+    hint: "Clear, direct prompt generation for everyday prompting.",
     placeholder: "Paste a rough prompt or describe what you want the AI to do..."
   },
   image: {
@@ -35,15 +35,10 @@ const modeMeta = {
     hint: "Sharpen subject, style, lighting, and composition.",
     placeholder: "Describe the scene, style, lighting, composition, and image details you want..."
   },
-  code: {
-    label: "Code",
-    hint: "Developer-ready prompts with stack, constraints, and outputs.",
-    placeholder: "Describe the bug, feature, stack, constraints, and output you want from the prompt..."
-  },
   vibe: {
-    label: "Vibe",
-    hint: "Shape tone, mood, brand feel, and creative direction.",
-    placeholder: "Describe the mood, tone, brand feel, or aesthetic direction you want Promptuno to sharpen..."
+    label: "Vibe Code",
+    hint: "Turn rough product ideas into terminal-clean build prompts.",
+    placeholder: "Describe the feature, stack, UX direction, constraints, and output you want from the vibe coding prompt..."
   }
 };
 
@@ -98,7 +93,7 @@ async function loadActiveSelection() {
 }
 
 function renderMode() {
-  const meta = modeMeta[state.mode] || modeMeta.cmd;
+  const meta = modeMeta[state.mode] || modeMeta.prompt;
   document.body.dataset.mode = state.mode;
   els.editorPanel.classList.remove("hidden");
   els.libraryPanel.classList.add("hidden");

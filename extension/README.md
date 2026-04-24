@@ -4,7 +4,7 @@ Promptuno for Chrome is the compact browser-native layer of Promptuno. It uses t
 
 ## What It Does
 
-- Generates better prompts in CMD, Image, Code, and Vibe categories.
+- Generates better prompts in Prompt, Image, and Vibe Code categories.
 - Adds a subtle inline Promptuno button near text inputs.
 - Works from the extension popup on any page.
 - Supports ChatGPT, Claude, Gemini, and Copilot as the primary visible models.

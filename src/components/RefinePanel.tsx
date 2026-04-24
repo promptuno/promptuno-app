@@ -48,13 +48,13 @@ export const RefinePanel: React.FC<RefinePanelProps> = ({
           </div>
           <div>
             <h3 className="text-[13px] font-black uppercase tracking-[0.18em]">
-              {mode === "Write" ? "Add context before writing" : "Refine before generating"}
+              Refine before generating
             </h3>
             <p className={cn(
               "text-[12px] leading-relaxed mt-1 max-w-xl font-medium",
               "text-neutral-500 dark:text-neutral-400"
             )}>
-              A few details can help Promptuno create a stronger {mode === "Write" ? "draft" : `${platform} prompt`} without slowing you down.
+              A few details can help Promptuno create a stronger {platform} prompt without slowing you down.
             </p>
           </div>
         </div>
@@ -109,7 +109,7 @@ export const RefinePanel: React.FC<RefinePanelProps> = ({
             "bg-black dark:bg-white text-white dark:text-black"
           )}
         >
-          {mode === "Write" ? "Write With Context" : "Generate Stronger Prompt"}
+          Generate Stronger Prompt
         </button>
       </div>
     </motion.div>

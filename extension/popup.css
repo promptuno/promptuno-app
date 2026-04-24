@@ -33,7 +33,7 @@ body {
   color: var(--ink);
 }
 
-body[data-mode="cmd"] .shell {
+body[data-mode="prompt"] .shell {
   background:
     radial-gradient(circle at 12% 0%, rgba(139, 92, 246, 0.16), transparent 34%),
     radial-gradient(circle at 100% 90%, rgba(59, 130, 246, 0.12), transparent 35%),
@@ -47,17 +47,10 @@ body[data-mode="image"] .shell {
     var(--bg);
 }
 
-body[data-mode="code"] .shell {
-  background:
-    radial-gradient(circle at 12% 0%, rgba(34, 211, 238, 0.16), transparent 34%),
-    radial-gradient(circle at 100% 90%, rgba(16, 185, 129, 0.12), transparent 35%),
-    var(--bg);
-}
-
 body[data-mode="vibe"] .shell {
   background:
-    radial-gradient(circle at 12% 0%, rgba(217, 70, 239, 0.16), transparent 34%),
-    radial-gradient(circle at 100% 90%, rgba(251, 146, 60, 0.12), transparent 35%),
+    radial-gradient(circle at 12% 0%, rgba(16, 185, 129, 0.16), transparent 34%),
+    radial-gradient(circle at 100% 90%, rgba(34, 211, 238, 0.12), transparent 35%),
     var(--bg);
 }
 
@@ -153,7 +146,7 @@ footer,
 }
 
 .mode-row {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .platforms {
@@ -190,7 +183,7 @@ footer,
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
 }
 
-.mode.active[data-mode="cmd"] {
+.mode.active[data-mode="prompt"] {
   background: linear-gradient(135deg, #8b5cf6, #ec4899, #3b82f6);
 }
 
@@ -198,12 +191,8 @@ footer,
   background: linear-gradient(135deg, #fbbf24, #fb7185, #ec4899);
 }
 
-.mode.active[data-mode="code"] {
-  background: linear-gradient(135deg, #22d3ee, #3b82f6, #10b981);
-}
-
 .mode.active[data-mode="vibe"] {
-  background: linear-gradient(135deg, #d946ef, #ec4899, #fb923c);
+  background: linear-gradient(135deg, #34d399, #22d3ee, #3b82f6);
 }
 
 .mode-hint {
@@ -258,7 +247,7 @@ textarea:focus {
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
 }
 
-body[data-mode="cmd"] .primary {
+body[data-mode="prompt"] .primary {
   background: linear-gradient(135deg, #8b5cf6, #ec4899, #3b82f6);
 }
 
@@ -266,12 +255,8 @@ body[data-mode="image"] .primary {
   background: linear-gradient(135deg, #fbbf24, #fb7185, #ec4899);
 }
 
-body[data-mode="code"] .primary {
-  background: linear-gradient(135deg, #22d3ee, #3b82f6, #10b981);
-}
-
 body[data-mode="vibe"] .primary {
-  background: linear-gradient(135deg, #d946ef, #ec4899, #fb923c);
+  background: linear-gradient(135deg, #34d399, #22d3ee, #3b82f6);
 }
 
 .primary:disabled {
@@ -294,7 +279,7 @@ body[data-mode="vibe"] .primary {
   margin-top: 14px;
 }
 
-body[data-mode="cmd"] .output-wrap {
+body[data-mode="prompt"] .output-wrap {
   border-color: rgba(139, 92, 246, 0.22);
 }
 
@@ -302,12 +287,24 @@ body[data-mode="image"] .output-wrap {
   border-color: rgba(251, 191, 36, 0.22);
 }
 
-body[data-mode="code"] .output-wrap {
-  border-color: rgba(34, 211, 238, 0.22);
+body[data-mode="vibe"] .output-wrap {
+  border-color: rgba(16, 185, 129, 0.22);
 }
 
+body[data-mode="vibe"] textarea,
 body[data-mode="vibe"] .output-wrap {
-  border-color: rgba(217, 70, 239, 0.22);
+  background: rgba(7, 18, 15, 0.92);
+  border-color: rgba(52, 211, 153, 0.18);
+  color: #d1fae5;
+}
+
+body[data-mode="vibe"] textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+body[data-mode="vibe"] textarea::placeholder,
+body[data-mode="vibe"] .mode-hint {
+  color: rgba(167, 243, 208, 0.72);
 }
 
 .output-head span {

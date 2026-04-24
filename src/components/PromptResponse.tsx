@@ -37,10 +37,15 @@ export const PromptResponse: React.FC<PromptResponseProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const responseLabel = `${theme.label} Prompt Ready`;
-  const goalLabel = `${theme.label} Prompt Strategy`;
-  const outputLabel = "Engineered Prompt";
-  const reasoningLabel = "Prompt Architecture";
+  const responseLabel = mode === "Vibe" ? "Vibe Code Prompt Ready" : `${theme.label} Prompt Ready`;
+  const goalLabel =
+    mode === "Image"
+      ? "Image Prompt Strategy"
+      : mode === "Vibe"
+        ? "Vibe Code Strategy"
+        : "Prompt Strategy";
+  const outputLabel = mode === "Image" ? "Visual Prompt" : mode === "Vibe" ? "Build Prompt" : "Engineered Prompt";
+  const reasoningLabel = mode === "Vibe" ? "Build Logic" : "Prompt Architecture";
 
   const refinementActions: Array<{ type: RefinementType; label: string; icon: React.ReactNode }> = [
     { type: "concise", label: t.refinements.Concise, icon: <Scissors className="w-4 h-4 transition-transform group-hover:scale-110" /> },
