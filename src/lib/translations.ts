@@ -2,13 +2,13 @@ import { Language } from "../types";
 
 const englishCopy = {
   modes: {
-    General: "General",
+    CMD: "CMD",
     Image: "Image",
     Code: "Code",
     Vibe: "Vibe",
   },
   placeholders: {
-    General: "Describe what you want the AI to do. Promptuno will engineer the best prompt for {platform}...",
+    CMD: "Describe what you want the AI to do. Promptuno will engineer the best prompt for {platform}...",
     Image: "Describe the subject, style, mood, composition, and details you want in the final image prompt...",
     Code: "Describe the feature, bug, stack, constraints, and output you want the coding prompt to produce...",
     Vibe: "Describe the tone, brand feel, creative direction, or aesthetic you want Promptuno to sharpen...",

@@ -6,7 +6,7 @@
 
 Promptuno's canonical production domain is https://www.promptuno.chat/.
 
-Promptuno is one product with two surfaces: the web app and the Chrome extension. It focuses on better prompting through four prompt categories: General, Image, Code, and Vibe.
+Promptuno is one product with two surfaces: the web app and the Chrome extension. It focuses on better prompting through four prompt categories: CMD, Image, Code, and Vibe.
 
 View your app in AI Studio: https://ai.studio/apps/61e35416-9d71-48e3-a785-1748e07c8172
 
@@ -41,4 +41,4 @@ Load it locally:
 3. Choose "Load unpacked"
 4. Select the `extension/` folder
 
-The extension keeps the same 5 free generations rule, uses the same primary models (ChatGPT, Claude, Gemini, Copilot), supports prompt generation across General, Image, Code, and Vibe categories, supports insertion into editable fields, and stores prompt history/saved prompts locally. Chrome Web Store copy is included in `extension/STORE_LISTING.md`.
+The extension keeps the same 5 free generations rule, uses the same primary models (ChatGPT, Claude, Gemini, Copilot), supports prompt generation across CMD, Image, Code, and Vibe categories, supports insertion into editable fields, and stores prompt history/saved prompts locally. Chrome Web Store copy is included in `extension/STORE_LISTING.md`.

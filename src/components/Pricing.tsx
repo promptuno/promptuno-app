@@ -13,7 +13,7 @@ export const Pricing: React.FC = () => {
       description: "Start with Promptuno's core prompt categories before upgrading.",
       features: [
         "5 free generations across web and Chrome",
-        "General, image, code, and vibe prompts",
+        "CMD, image, code, and vibe prompts",
         "Chrome extension included",
         "Primary models: ChatGPT, Claude, Gemini, and Copilot",
       ],

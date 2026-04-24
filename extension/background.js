@@ -119,9 +119,9 @@ async function appendList(key, item) {
 }
 
 async function generateWithPromptuno({ action = "prompt", input = "", platform = "ChatGPT", context = "" }) {
-  const category = ["general", "image", "code", "vibe"].includes(String(action).toLowerCase())
+  const category = ["cmd", "image", "code", "vibe"].includes(String(action).toLowerCase())
     ? String(action).toLowerCase()
-    : "general";
+    : "cmd";
   const cleanInput = input.trim();
   if (!cleanInput) throw new Error("Type or select text first.");
 
@@ -131,7 +131,7 @@ async function generateWithPromptuno({ action = "prompt", input = "", platform =
       ? "Transform the user's rough text into a stronger coding prompt with stack, constraints, output format, acceptance criteria, and edge cases."
       : category === "vibe"
         ? "Transform the user's rough text into a stronger tone-and-style prompt with mood, brand direction, references, and aesthetic clarity."
-        : "Transform the user's rough text into a stronger AI prompt with clear role, objective, context, constraints, and output format.";
+        : "Transform the user's rough text into a stronger command prompt with clear role, objective, context, constraints, and output format.";
 
   const system = [
     "You are Promptuno, a premium prompt assistant.",

@@ -33,6 +33,34 @@ body {
   color: var(--ink);
 }
 
+body[data-mode="cmd"] .shell {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(139, 92, 246, 0.16), transparent 34%),
+    radial-gradient(circle at 100% 90%, rgba(59, 130, 246, 0.12), transparent 35%),
+    var(--bg);
+}
+
+body[data-mode="image"] .shell {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(251, 191, 36, 0.18), transparent 34%),
+    radial-gradient(circle at 100% 90%, rgba(244, 114, 182, 0.14), transparent 35%),
+    var(--bg);
+}
+
+body[data-mode="code"] .shell {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(34, 211, 238, 0.16), transparent 34%),
+    radial-gradient(circle at 100% 90%, rgba(16, 185, 129, 0.12), transparent 35%),
+    var(--bg);
+}
+
+body[data-mode="vibe"] .shell {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(217, 70, 239, 0.16), transparent 34%),
+    radial-gradient(circle at 100% 90%, rgba(251, 146, 60, 0.12), transparent 35%),
+    var(--bg);
+}
+
 button,
 textarea,
 input {
@@ -42,10 +70,7 @@ input {
 .shell {
   min-height: 560px;
   padding: 18px;
-  background:
-    radial-gradient(circle at 10% 0%, rgba(99, 102, 241, 0.1), transparent 34%),
-    radial-gradient(circle at 100% 90%, rgba(245, 158, 11, 0.08), transparent 35%),
-    var(--bg);
+  transition: background 220ms ease;
 }
 
 .topbar,
@@ -149,11 +174,44 @@ footer,
   cursor: pointer;
 }
 
-.mode.active,
 .platform.active {
   background: var(--bg);
   color: var(--ink);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.mode {
+  position: relative;
+  overflow: hidden;
+}
+
+.mode.active {
+  color: white;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.mode.active[data-mode="cmd"] {
+  background: linear-gradient(135deg, #8b5cf6, #ec4899, #3b82f6);
+}
+
+.mode.active[data-mode="image"] {
+  background: linear-gradient(135deg, #fbbf24, #fb7185, #ec4899);
+}
+
+.mode.active[data-mode="code"] {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6, #10b981);
+}
+
+.mode.active[data-mode="vibe"] {
+  background: linear-gradient(135deg, #d946ef, #ec4899, #fb923c);
+}
+
+.mode-hint {
+  margin: 10px 4px 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+  min-height: 16px;
 }
 
 .label,
@@ -191,13 +249,29 @@ textarea:focus {
   border-radius: 18px;
   margin-top: 14px;
   padding: 14px;
-  background: var(--ink);
-  color: var(--bg);
+  color: white;
   font-size: 12px;
   font-weight: 950;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+}
+
+body[data-mode="cmd"] .primary {
+  background: linear-gradient(135deg, #8b5cf6, #ec4899, #3b82f6);
+}
+
+body[data-mode="image"] .primary {
+  background: linear-gradient(135deg, #fbbf24, #fb7185, #ec4899);
+}
+
+body[data-mode="code"] .primary {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6, #10b981);
+}
+
+body[data-mode="vibe"] .primary {
+  background: linear-gradient(135deg, #d946ef, #ec4899, #fb923c);
 }
 
 .primary:disabled {
@@ -218,6 +292,22 @@ textarea:focus {
 
 .output-wrap {
   margin-top: 14px;
+}
+
+body[data-mode="cmd"] .output-wrap {
+  border-color: rgba(139, 92, 246, 0.22);
+}
+
+body[data-mode="image"] .output-wrap {
+  border-color: rgba(251, 191, 36, 0.22);
+}
+
+body[data-mode="code"] .output-wrap {
+  border-color: rgba(34, 211, 238, 0.22);
+}
+
+body[data-mode="vibe"] .output-wrap {
+  border-color: rgba(217, 70, 239, 0.22);
 }
 
 .output-head span {

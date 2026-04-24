@@ -70,7 +70,7 @@ async function improveText(text) {
 
   const response = await chrome.runtime.sendMessage({
     type: "PROMPTUNO_GENERATE",
-    action: "general",
+    action: "cmd",
     platform: detectPlatform(),
     input,
     context: location.hostname

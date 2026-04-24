@@ -10,7 +10,7 @@ Generate better AI prompts anywhere you work.
 
 ## Long Description
 
-Promptuno is a clean, premium assistant for people who work with AI seriously. It helps you generate better prompts across General, Image, Code, and Vibe categories.
+Promptuno is a clean, premium assistant for people who work with AI seriously. It helps you generate better prompts across CMD, Image, Code, and Vibe categories.
 
 Official web app: https://www.promptuno.chat/
 
@@ -20,7 +20,7 @@ Promptuno stays focused on prompts first. The extension is built to reduce frict
 
 ## Key Features
 
-- General, Image, Code, and Vibe prompt categories.
+- CMD, Image, Code, and Vibe prompt categories.
 - Works inside major AI tools and supported text areas.
 - Clean popup panel for prompt generation.
 - Primary model focus: ChatGPT, Claude, Gemini, and Copilot.

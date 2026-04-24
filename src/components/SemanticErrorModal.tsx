@@ -2,6 +2,8 @@ import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { AlertCircle, X, ArrowRight } from "lucide-react";
 import { AppMode } from "../types";
+import { modeThemes } from "../lib/modeThemes";
+import { cn } from "../lib/utils";
 
 interface SemanticErrorModalProps {
   isOpen: boolean;
@@ -14,7 +16,9 @@ export const SemanticErrorModal: React.FC<SemanticErrorModalProps> = ({
   isOpen,
   onClose,
   message,
+  mode,
 }) => {
+  const theme = modeThemes[mode];
   return (
     <AnimatePresence>
       {isOpen && (
@@ -32,7 +36,7 @@ export const SemanticErrorModal: React.FC<SemanticErrorModalProps> = ({
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             className="relative w-full max-w-lg p-8 rounded-[32px] border shadow-2xl overflow-hidden bg-white dark:bg-neutral-900 border-neutral-100 dark:border-white/5"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 blur-[80px] -z-10 opacity-20 bg-red-500" />
+            <div className={cn("absolute top-0 right-0 w-32 h-32 blur-[80px] -z-10 opacity-30", theme.orbPrimary)} />
 
             <div className="flex items-start justify-between mb-8">
               <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg bg-red-50 dark:bg-red-500/10 text-red-500">
@@ -57,7 +61,7 @@ export const SemanticErrorModal: React.FC<SemanticErrorModalProps> = ({
 
             <button
               onClick={onClose}
-              className="w-full py-4 rounded-2xl font-black uppercase tracking-widest text-[12px] flex items-center justify-center gap-2 group transition-all bg-black dark:bg-white text-white dark:text-black hover:scale-[1.02] active:scale-[0.98]"
+              className={cn("w-full py-4 rounded-2xl font-black uppercase tracking-widest text-[12px] flex items-center justify-center gap-2 group transition-all text-white hover:scale-[1.02] active:scale-[0.98]", theme.accentGradient)}
             >
               I Understand
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

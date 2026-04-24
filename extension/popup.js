@@ -1,5 +1,5 @@
 const state = {
-  mode: "general",
+  mode: "cmd",
   platform: "ChatGPT",
   output: ""
 };
@@ -22,6 +22,29 @@ const els = {
   libraryPanel: document.getElementById("libraryPanel"),
   savedList: document.getElementById("savedList"),
   historyList: document.getElementById("historyList")
+};
+
+const modeMeta = {
+  cmd: {
+    label: "CMD",
+    hint: "Core prompt setup for everyday prompting.",
+    placeholder: "Paste a rough prompt or describe what you want the AI to do..."
+  },
+  image: {
+    label: "Image",
+    hint: "Sharpen subject, style, lighting, and composition.",
+    placeholder: "Describe the scene, style, lighting, composition, and image details you want..."
+  },
+  code: {
+    label: "Code",
+    hint: "Developer-ready prompts with stack, constraints, and outputs.",
+    placeholder: "Describe the bug, feature, stack, constraints, and output you want from the prompt..."
+  },
+  vibe: {
+    label: "Vibe",
+    hint: "Shape tone, mood, brand feel, and creative direction.",
+    placeholder: "Describe the mood, tone, brand feel, or aesthetic direction you want Promptuno to sharpen..."
+  }
 };
 
 init();
@@ -75,17 +98,13 @@ async function loadActiveSelection() {
 }
 
 function renderMode() {
-  const placeholders = {
-    general: "Paste a rough prompt or describe what you want the AI to do...",
-    image: "Describe the scene, style, lighting, composition, and image details you want...",
-    code: "Describe the bug, feature, stack, constraints, and output you want from the prompt...",
-    vibe: "Describe the mood, tone, brand feel, or aesthetic direction you want Promptuno to sharpen..."
-  };
-
+  const meta = modeMeta[state.mode] || modeMeta.cmd;
+  document.body.dataset.mode = state.mode;
   els.editorPanel.classList.remove("hidden");
   els.libraryPanel.classList.add("hidden");
   els.status.textContent = "";
-  els.input.placeholder = placeholders[state.mode] || placeholders.general;
+  els.input.placeholder = meta.placeholder;
+  document.getElementById("modeHint").textContent = meta.hint;
   els.generate.textContent = "Generate Prompt";
 }
 
@@ -134,7 +153,7 @@ async function saveOutput() {
   if (!state.output) return;
   await chrome.runtime.sendMessage({
     type: "PROMPTUNO_SAVE_PROMPT",
-    title: `${state.platform} ${capitalize(state.mode)} prompt`,
+    title: `${state.platform} ${modeMeta[state.mode]?.label || capitalize(state.mode)} prompt`,
     text: state.output
   });
   els.status.textContent = "Saved locally.";

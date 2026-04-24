@@ -5,6 +5,7 @@ import { cn } from "../lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import { Typewriter } from "./Typewriter";
 import { translations } from "../lib/translations";
+import { modeThemes } from "../lib/modeThemes";
 
 interface PromptResponseProps {
   request: string;
@@ -26,6 +27,7 @@ export const PromptResponse: React.FC<PromptResponseProps> = ({
   lang,
 }) => {
   const t = translations[lang];
+  const theme = modeThemes[mode];
   const [copied, setCopied] = useState(false);
   const [isTypingComplete, setIsTypingComplete] = useState(false);
 
@@ -35,8 +37,8 @@ export const PromptResponse: React.FC<PromptResponseProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const responseLabel = "Prompt Ready";
-  const goalLabel = `${mode} Prompt Strategy`;
+  const responseLabel = `${theme.label} Prompt Ready`;
+  const goalLabel = `${theme.label} Prompt Strategy`;
   const outputLabel = "Engineered Prompt";
   const reasoningLabel = "Prompt Architecture";
 
@@ -59,22 +61,22 @@ export const PromptResponse: React.FC<PromptResponseProps> = ({
         animate={{ opacity: 1, x: 0 }}
         className="flex gap-3 md:gap-5 px-4 md:px-2"
       >
-        <div className="w-8 h-8 rounded-full flex-shrink-0 animate-pulse bg-neutral-200 dark:bg-neutral-800" />
+        <div className={cn("w-8 h-8 rounded-full flex-shrink-0 animate-pulse", theme.accentSoft)} />
         <div className="pt-1.5 flex-1 text-left">
           <p className="text-[14px] font-medium italic text-neutral-600 dark:text-neutral-400">"{request}"</p>
         </div>
       </motion.div>
 
       <div className="flex gap-3 md:gap-5">
-        <div className="w-8 h-8 rounded-full items-center justify-center flex-shrink-0 shadow-lg ring-4 hidden sm:flex bg-black dark:bg-white ring-black/5 dark:ring-white/5">
+        <div className={cn("w-8 h-8 rounded-full items-center justify-center flex-shrink-0 shadow-lg ring-4 hidden sm:flex", theme.accentGradient, "ring-black/5 dark:ring-white/5")}>
           <div className="w-3 h-3 border-2 border-white dark:border-black rotate-45" />
         </div>
 
-        <div className="flex-1 backdrop-blur-3xl border rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden bg-white/50 dark:bg-[#080808]/50 border-neutral-200 dark:border-white/10">
+        <div className={cn("flex-1 backdrop-blur-3xl border rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden bg-white/50 dark:bg-[#080808]/50 border-neutral-200 dark:border-white/10", theme.accentGlow)}>
           <div className="p-4 md:p-8 space-y-4 md:space-y-6 text-left">
             <div className="flex items-center justify-between border-b pb-4 md:pb-5 border-neutral-50 dark:border-white/5">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 animate-spin-slow text-amber-500" />
+                <Sparkles className={cn("w-4 h-4 animate-spin-slow", theme.accentText)} />
                 <span className="text-[11px] font-black uppercase tracking-[0.2em] text-neutral-400 dark:text-neutral-500">
                   {responseLabel}
                 </span>
@@ -93,18 +95,19 @@ export const PromptResponse: React.FC<PromptResponseProps> = ({
               </button>
             </div>
 
-            <div className="text-[14px] md:text-[15px] leading-relaxed font-medium p-4 md:p-6 rounded-xl md:rounded-2xl border shadow-inner relative overflow-hidden group bg-neutral-50 dark:bg-white/[0.02] text-neutral-800 dark:text-neutral-100 border-neutral-100 dark:border-white/5">
-              <span className="font-black text-[11px] uppercase tracking-widest block mb-4 border-b pb-1 w-fit text-indigo-500 dark:text-indigo-400 border-indigo-500/10">
+            <div className={cn("text-[14px] md:text-[15px] leading-relaxed font-medium p-4 md:p-6 rounded-xl md:rounded-2xl border shadow-inner relative overflow-hidden group bg-neutral-50 dark:bg-white/[0.02] text-neutral-800 dark:text-neutral-100 border-neutral-100 dark:border-white/5", theme.accentBorder)}>
+              <div className={cn("absolute inset-x-0 top-0 h-1", theme.accentGradient)} />
+              <span className={cn("font-black text-[11px] uppercase tracking-widest block mb-4 border-b pb-1 w-fit", theme.accentText, theme.accentBorder)}>
                 {goalLabel}
               </span>
               <p className="mb-8 opacity-80 leading-relaxed">
                 <Typewriter text={response.goal} speed={15} />
               </p>
 
-              <span className="font-black text-[11px] uppercase tracking-widest block mb-3 border-b pb-1 w-fit text-indigo-500 dark:text-indigo-400 border-indigo-500/10">
+              <span className={cn("font-black text-[11px] uppercase tracking-widest block mb-3 border-b pb-1 w-fit", theme.accentText, theme.accentBorder)}>
                 {outputLabel}
               </span>
-              <div className="whitespace-pre-wrap leading-relaxed selection:bg-indigo-500/20">
+              <div className="whitespace-pre-wrap leading-relaxed selection:bg-white/20">
                 <Typewriter
                   text={response.engineeredPrompt}
                   speed={8}
@@ -119,11 +122,11 @@ export const PromptResponse: React.FC<PromptResponseProps> = ({
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="p-5 rounded-2xl border transition-all bg-indigo-500/5 border-indigo-500/20 hover:bg-indigo-500/[0.07]"
+                  className={cn("p-5 rounded-2xl border transition-all hover:bg-white/[0.07]", theme.accentSoft, theme.accentBorder)}
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <Zap className="w-3.5 h-3.5 text-indigo-500" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] block text-indigo-500">
+                    <Zap className={cn("w-3.5 h-3.5", theme.accentText)} />
+                    <span className={cn("text-[10px] font-black uppercase tracking-[0.2em] block", theme.accentText)}>
                       {reasoningLabel}
                     </span>
                   </div>
@@ -143,7 +146,7 @@ export const PromptResponse: React.FC<PromptResponseProps> = ({
                 >
                   <button
                     onClick={onRegenerate}
-                    className="group px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-[0.15em] transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-xl bg-black dark:bg-white text-white dark:text-black"
+                    className={cn("group px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-[0.15em] transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-xl text-white", theme.accentGradient, theme.accentGlow)}
                   >
                     <RotateCcw className="w-4 h-4 transition-transform group-hover:rotate-180 duration-500" />
                     {t.refinements.Reforge}

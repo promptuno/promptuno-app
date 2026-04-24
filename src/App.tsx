@@ -16,6 +16,7 @@ import { SemanticErrorModal } from "./components/SemanticErrorModal";
 import { Logo } from "./components/Logo";
 import { LanguageSwitcher } from "./components/LanguageSwitcher";
 import { Language } from "./types";
+import { modeThemes } from "./lib/modeThemes";
 
 type View = "app" | "pricing" | "privacy" | "terms";
 
@@ -173,7 +174,7 @@ function buildRefineQuestions(input: string, mode: AppMode, platform: Platform) 
 }
 
 export default function App() {
-  const [mode, setMode] = useState<AppMode>("General");
+  const [mode, setMode] = useState<AppMode>("CMD");
   const [platform, setPlatform] = useState<Platform>("ChatGPT");
   const [inputValue, setInputValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -192,6 +193,7 @@ export default function App() {
   
   const { isLimitReached, limit, remaining, increment, reset } = useUsageLimit();
   const { theme, toggleTheme } = useTheme();
+  const modeTheme = modeThemes[mode];
 
   const handleInputChange = (nextValue: any) => {
     setInputValue((previous) => (typeof nextValue === "function" ? nextValue(previous) : nextValue));
@@ -258,7 +260,7 @@ export default function App() {
             ? "Specialize in coding prompts. Include role, stack, constraints, inputs, outputs, acceptance criteria, edge cases, and debugging or implementation guidance where useful."
             : mode === "Vibe"
               ? "Specialize in aesthetic, brand, tone, and creative-direction prompts. Clarify mood, voice, energy, references, and desired emotional effect."
-              : "Specialize in high-performance general prompts for research, strategy, execution, and communication.";
+              : "Specialize in high-performance command prompts for research, strategy, execution, and communication.";
 
       const systemInstruction = `You are Promptuno, an AI Prompt Architect.
 Your mission is to transform user intent into elite-tier prompts for ${platform}.
@@ -353,23 +355,11 @@ JSON structure:
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className={cn(
           "absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] animate-pulse",
-          mode === "Image"
-            ? "bg-amber-500/5 dark:bg-amber-500/10"
-            : mode === "Code"
-              ? "bg-cyan-500/5 dark:bg-cyan-500/10"
-              : mode === "Vibe"
-                ? "bg-fuchsia-500/5 dark:bg-fuchsia-500/10"
-                : "bg-indigo-500/5 dark:bg-indigo-500/10"
+          modeTheme.orbPrimary
         )}></div>
         <div className={cn(
           "absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] animate-pulse",
-          mode === "Image"
-            ? "bg-indigo-500/5 dark:bg-indigo-500/10"
-            : mode === "Code"
-              ? "bg-emerald-500/5 dark:bg-emerald-500/10"
-              : mode === "Vibe"
-                ? "bg-amber-500/5 dark:bg-amber-500/10"
-                : "bg-amber-500/5 dark:bg-amber-500/10"
+          modeTheme.orbSecondary
         )} style={{ animationDelay: '2s' }}></div>
       </div>
 

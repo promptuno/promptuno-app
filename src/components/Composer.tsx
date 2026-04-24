@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { ArrowUp, Mic, MicOff, Rocket, Sparkles, X } from "lucide-react";
+import { ArrowUp, Braces, Image as ImageIcon, Mic, MicOff, Palette, Rocket, TerminalSquare, X } from "lucide-react";
 import { cn } from "../lib/utils";
 import { AppMode, Platform } from "../types";
 import { PLATFORMS } from "../constants";
@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Language } from "../types";
 import { translations } from "../lib/translations";
 import { modelGuidance } from "../lib/productLayers";
+import { modeThemes } from "../lib/modeThemes";
 
 interface ComposerProps {
   value: string;
@@ -48,6 +49,7 @@ export const Composer: React.FC<ComposerProps> = ({
   onMobileComposerClose,
 }) => {
   const t = translations[lang];
+  const theme = modeThemes[mode];
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isListening, setIsListening] = useState(false);
   const [isLimitDismissed, setIsLimitDismissed] = useState(false);
@@ -190,12 +192,19 @@ export const Composer: React.FC<ComposerProps> = ({
       <div className={cn(
         "relative flex flex-col p-5 md:p-8 backdrop-blur-3xl border transition-all duration-500 overflow-hidden bg-white/70 dark:bg-[#080808]/70 border-neutral-200 dark:border-white/10 rounded-[32px] md:rounded-[40px] shadow-[0_30px_70px_rgba(0,0,0,0.04)] dark:shadow-[0_40px_120px_rgba(0,0,0,0.8)]",
         disabled && "opacity-80 grayscale-[0.5]",
-        isListening && "ring-2 ring-indigo-500/20"
+        isListening && theme.accentBorder
       )}>
+        <div className={cn("absolute inset-x-0 top-0 h-1 opacity-90", theme.accentGradient)} />
+        <div className={cn("absolute -top-16 -right-10 w-40 h-40 rounded-full blur-3xl", theme.orbPrimary)} />
+        <div className={cn("absolute -bottom-16 -left-10 w-40 h-40 rounded-full blur-3xl", theme.orbSecondary)} />
         {isLimitReached && !isLimitDismissed && (
           <div className="absolute inset-0 z-50 backdrop-blur-xl bg-white/20 dark:bg-black/20 flex flex-col items-center justify-center p-5 text-center animate-in fade-in duration-500">
             <div className="bg-white dark:bg-neutral-900 p-6 md:p-8 rounded-[28px] md:rounded-[32px] shadow-2xl border border-neutral-100 dark:border-white/10 max-w-sm">
-              <Sparkles className="w-10 h-10 text-indigo-500 mx-auto mb-4" />
+              <div className={cn("w-12 h-12 rounded-3xl flex items-center justify-center mx-auto mb-4", theme.accentSoft, theme.accentBorder, "border")}>
+                <div className={theme.accentText}>
+                  {mode === "CMD" ? <TerminalSquare className="w-6 h-6" /> : mode === "Image" ? <ImageIcon className="w-6 h-6" /> : mode === "Code" ? <Braces className="w-6 h-6" /> : <Palette className="w-6 h-6" />}
+                </div>
+              </div>
               <h3 className="text-xl font-black uppercase tracking-tight mb-2">{t.labels.LimitReached}</h3>
               <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-5">{t.labels.LimitDescription}</p>
               <p className="text-[11px] text-neutral-400 dark:text-neutral-500 font-bold uppercase tracking-[0.18em] mb-6">
@@ -228,7 +237,7 @@ export const Composer: React.FC<ComposerProps> = ({
               <button
                 type="button"
                 onClick={onUpgrade}
-                className="px-6 py-2 bg-indigo-500 text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-colors shadow-lg"
+                className={cn("px-6 py-2 text-white rounded-full text-[10px] font-black uppercase tracking-widest transition-colors shadow-lg", theme.accentStrong)}
               >
                 {t.buttons.Unlock}
               </button>
@@ -239,10 +248,10 @@ export const Composer: React.FC<ComposerProps> = ({
         <div className="flex flex-col gap-3 mb-5 md:mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <span className="text-[11px] md:text-[14px] font-black uppercase tracking-[0.16em] md:tracking-[0.2em] text-neutral-400 dark:text-neutral-600 text-center sm:text-left">
-              {mode} prompts for
+              {theme.label} prompts for
             </span>
             <span className="text-[10px] font-black uppercase tracking-[0.16em] text-neutral-400 dark:text-neutral-500 text-center sm:text-right">
-              Perfect prompt engineering
+              {theme.description}
             </span>
           </div>
 
@@ -262,7 +271,7 @@ export const Composer: React.FC<ComposerProps> = ({
                 {platform === p && (
                   <motion.div
                     layoutId="platform-pill"
-                    className="absolute inset-0 shadow-sm rounded-xl -z-0 border bg-white dark:bg-neutral-800 border-neutral-100 dark:border-white/10"
+                    className={cn("absolute inset-0 shadow-sm rounded-xl -z-0 border bg-white dark:bg-neutral-800", theme.accentBorder)}
                     transition={{ type: "spring", bounce: 0.1, duration: 0.5 }}
                   />
                 )}
@@ -274,10 +283,10 @@ export const Composer: React.FC<ComposerProps> = ({
           {modelGuidance[platform] && (
             <p className="text-[11px] leading-relaxed font-medium text-center sm:text-left text-neutral-400 dark:text-neutral-500">
               {mode === "Image"
-                ? `Use ${platform} to sharpen subject, style, lighting, composition, and visual constraints.`
-                : mode === "Code"
-                  ? `${platform} prompts work best with stack details, acceptance criteria, edge cases, and exact output format.`
-                  : mode === "Vibe"
+                  ? `Use ${platform} to sharpen subject, style, lighting, composition, and visual constraints.`
+                  : mode === "Code"
+                    ? `${platform} prompts work best with stack details, acceptance criteria, edge cases, and exact output format.`
+                    : mode === "Vibe"
                     ? `${platform} can sharpen tone, mood, brand direction, and aesthetic clarity.`
                     : modelGuidance[platform]}
             </p>
@@ -288,15 +297,17 @@ export const Composer: React.FC<ComposerProps> = ({
           <button
             type="button"
             onClick={openMobileComposer}
-            className="w-full text-left rounded-[28px] border border-neutral-100 dark:border-white/5 bg-neutral-50/70 dark:bg-white/[0.03] px-4 py-5 transition-all hover:border-neutral-200 dark:hover:border-white/10"
+            className={cn("w-full text-left rounded-[28px] border bg-neutral-50/70 dark:bg-white/[0.03] px-4 py-5 transition-all", theme.accentBorder, "hover:border-neutral-200 dark:hover:border-white/10")}
           >
             <div className="flex items-start gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-white/5 flex items-center justify-center shadow-sm">
-                <Sparkles className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
+              <div className={cn("w-11 h-11 rounded-2xl bg-white dark:bg-neutral-900 border flex items-center justify-center shadow-sm", theme.accentBorder)}>
+                <div className={theme.accentText}>
+                  {mode === "CMD" ? <TerminalSquare className="w-4 h-4" /> : mode === "Image" ? <ImageIcon className="w-4 h-4" /> : mode === "Code" ? <Braces className="w-4 h-4" /> : <Palette className="w-4 h-4" />}
+                </div>
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-[11px] font-black uppercase tracking-[0.16em] text-neutral-400 dark:text-neutral-500">
-                  {mode} prompts
+                <div className={cn("text-[11px] font-black uppercase tracking-[0.16em]", theme.accentText)}>
+                  {theme.label} prompts
                 </div>
                 <div className="mt-2 text-[15px] font-semibold text-neutral-900 dark:text-white leading-relaxed">
                   {placeholderText || t.placeholders[mode].replace("{platform}", platform)}
@@ -309,7 +320,9 @@ export const Composer: React.FC<ComposerProps> = ({
           </button>
         ) : (
           <div className="flex items-start gap-3 md:gap-4">
-            <Sparkles className="w-6 h-6 text-neutral-300 dark:text-neutral-700 mt-1" />
+            <div className={cn("mt-1", theme.accentText)}>
+              {mode === "CMD" ? <TerminalSquare className="w-6 h-6" /> : mode === "Image" ? <ImageIcon className="w-6 h-6" /> : mode === "Code" ? <Braces className="w-6 h-6" /> : <Palette className="w-6 h-6" />}
+            </div>
             <textarea
               ref={textareaRef}
               value={value}
@@ -332,7 +345,7 @@ export const Composer: React.FC<ComposerProps> = ({
           </div>
         )}
 
-        <div className="mt-5 rounded-2xl border p-3 flex items-center justify-between gap-3 bg-neutral-50/70 dark:bg-white/[0.03] border-neutral-100 dark:border-white/5">
+        <div className={cn("mt-5 rounded-2xl border p-3 flex items-center justify-between gap-3 bg-neutral-50/70 dark:bg-white/[0.03]", theme.accentBorder)}>
           <div>
             <div className="text-[10px] font-black uppercase tracking-[0.18em] text-neutral-400 dark:text-neutral-500">
               Free generations left
@@ -345,7 +358,7 @@ export const Composer: React.FC<ComposerProps> = ({
             <motion.div
               initial={false}
               animate={{ width: `${usagePercent}%` }}
-              className={cn("h-full rounded-full", usageRemaining <= 1 ? "bg-red-500" : "bg-black dark:bg-white")}
+              className={cn("h-full rounded-full", usageRemaining <= 1 ? "bg-red-500" : theme.accentGradient)}
             />
           </div>
         </div>
@@ -373,7 +386,7 @@ export const Composer: React.FC<ComposerProps> = ({
             className={cn(
               "group relative w-full sm:w-auto px-8 py-4 rounded-[20px] md:rounded-[24px] text-[13px] md:text-[15px] font-black uppercase tracking-[0.12em] md:tracking-[0.15em] transition-all duration-500 overflow-hidden shadow-2xl flex items-center justify-center order-2 sm:order-3",
               value.trim() && !disabled && !isLimitReached
-                ? "bg-black text-white dark:bg-white dark:text-black hover:-translate-y-1 active:translate-y-0"
+                ? cn("text-white hover:-translate-y-1 active:translate-y-0", theme.accentGradient, theme.accentGlow)
                 : "bg-neutral-100 text-neutral-300 dark:bg-neutral-900 dark:text-neutral-800 cursor-not-allowed"
             )}
           >

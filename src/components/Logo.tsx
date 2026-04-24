@@ -1,5 +1,4 @@
 import React from "react";
-import { Sparkles } from "lucide-react";
 import { cn } from "../lib/utils";
 import { AppMode } from "../types";
 
@@ -9,7 +8,16 @@ interface LogoProps {
   showText?: boolean;
 }
 
-export const Logo: React.FC<LogoProps> = ({ className, showText = true }) => {
+export const Logo: React.FC<LogoProps> = ({ className, mode = "CMD", showText = true }) => {
+  const colors =
+    mode === "Image"
+      ? ["#F59E0B", "#EC4899", "#FB7185"]
+      : mode === "Code"
+        ? ["#22D3EE", "#3B82F6", "#10B981"]
+        : mode === "Vibe"
+          ? ["#D946EF", "#EC4899", "#FB923C"]
+          : ["#A855F7", "#8B5CF6", "#3B82F6"];
+
   return (
     <div className={cn("flex items-center gap-2 group shrink-0", className)}>
       <div className="relative w-10 h-10 flex items-center justify-center">
@@ -17,9 +25,9 @@ export const Logo: React.FC<LogoProps> = ({ className, showText = true }) => {
         <svg viewBox="0 0 40 40" className="w-full h-full fill-none overflow-visible">
           <defs>
             <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#A855F7" />
-              <stop offset="50%" stopColor="#8B5CF6" />
-              <stop offset="100%" stopColor="#3B82F6" />
+              <stop offset="0%" stopColor={colors[0]} />
+              <stop offset="50%" stopColor={colors[1]} />
+              <stop offset="100%" stopColor={colors[2]} />
             </linearGradient>
           </defs>
           
@@ -33,11 +41,12 @@ export const Logo: React.FC<LogoProps> = ({ className, showText = true }) => {
           {/* Internal Star */}
           <path 
             d="M26,12 L27.5,15.5 L31,17 L27.5,18.5 L26,22 L24.5,18.5 L21,17 L24.5,15.5 Z" 
-            className="fill-purple-500 animate-pulse"
+            style={{ fill: colors[1] }}
+            className="animate-pulse"
           />
           
           {/* Accent dot */}
-          <circle cx="34" cy="10" r="2.5" className="fill-pink-500" />
+          <circle cx="34" cy="10" r="2.5" style={{ fill: colors[2] }} />
         </svg>
       </div>
       

@@ -4,6 +4,7 @@ import { Search, Database, Cpu, Sparkles, BrainCircuit, ScanSearch, CheckCircle2
 import { cn } from "../lib/utils";
 import { AppMode, Language } from "../types";
 import { translations } from "../lib/translations";
+import { modeThemes } from "../lib/modeThemes";
 
 interface AnalysisLoaderProps {
   platform: string;
@@ -51,24 +52,18 @@ function getKeywords(request: string) {
     .slice(0, 5);
 }
 
-export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode = "General", lang, request = "" }) => {
+export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode = "CMD", lang, request = "" }) => {
   const t = translations[lang];
   const [currentStep, setCurrentStep] = useState(0);
   const keywords = getKeywords(request);
   const keywordText = keywords.length ? keywords.join(" / ") : platform;
-  const accentClass =
-    mode === "Image"
-      ? "bg-amber-500"
-      : mode === "Code"
-        ? "bg-cyan-500"
-        : mode === "Vibe"
-          ? "bg-fuchsia-500"
-          : "bg-indigo-500";
+  const theme = modeThemes[mode];
+  const accentClass = theme.accentStrong;
 
   const steps = [
     { icon: Search, label: "Reading Your Intent", sub: `Detecting: ${keywordText}` },
-    { icon: ScanSearch, label: `Mapping ${mode} Prompt Context`, sub: t.loading.Scanning.replace("{platform}", platform) },
-    { icon: Database, label: `Structuring ${mode} Prompt`, sub: t.loading.Architecting },
+    { icon: ScanSearch, label: `Mapping ${theme.label} Prompt Context`, sub: t.loading.Scanning.replace("{platform}", platform) },
+    { icon: Database, label: `Structuring ${theme.label} Prompt`, sub: t.loading.Architecting },
     { icon: Cpu, label: "Sharpening Output", sub: t.loading.Optimizing },
     { icon: BrainCircuit, label: "Ready Soon", sub: "Polishing the final answer" },
   ];
@@ -127,7 +122,7 @@ export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode =
                 className="absolute inset-0"
               >
                 <div
-                  className={cn("w-2 h-2 rounded-full absolute -top-1 left-1/2 -translate-x-1/2", accentClass.replace("500", "400"))}
+                  className={cn("w-2 h-2 rounded-full absolute -top-1 left-1/2 -translate-x-1/2", theme.accentSoft)}
                   style={{ left: `${40 + i * 10}%` }}
                 />
               </motion.div>
@@ -211,7 +206,7 @@ export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode =
               initial={{ width: 0 }}
               animate={{ width: "100%" }}
               transition={{ duration: 4, ease: "linear" }}
-              className="h-full bg-black dark:bg-white"
+              className={cn("h-full", theme.accentGradient)}
             />
           </div>
           <motion.div
