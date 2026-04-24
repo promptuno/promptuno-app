@@ -1,0 +1,36 @@
+name: Publish Refined Promptuno
+
+on:
+  push:
+    paths:
+      - .github/workflows/publish-refined-promptuno.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  upload-project:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download refined source
+        run: |
+          curl -L "https://tmpfiles.org/dl/34977314/promptuno-refined-source.zip" -o /tmp/promptuno-refined-source.zip
+          unzip -q /tmp/promptuno-refined-source.zip -d /tmp/promptuno-refined-source
+      - name: Sync project files
+        run: |
+          rsync -a --delete \
+            --exclude '.git' \
+            --exclude 'node_modules' \
+            --exclude 'dist' \
+            /tmp/promptuno-refined-source/ ./
+      - name: Commit refined app
+        run: |
+          git config user.name "Promptuno Bot"
+          git config user.email "actions@github.com"
+          git add -A
+          git commit -m "Refine prompt category experience" || exit 0
+          git push
