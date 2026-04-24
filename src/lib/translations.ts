@@ -2,16 +2,19 @@ import { Language } from "../types";
 
 const englishCopy = {
   modes: {
-    Prompt: "Prompt",
-    Write: "Write",
+    General: "General",
+    Image: "Image",
+    Code: "Code",
+    Vibe: "Vibe",
   },
   placeholders: {
-    Prompt: "Describe what you want the AI to do. Promptuno will engineer the best prompt for {platform}...",
-    Write: "Paste rough notes, a messy draft, or the message you need. Promptuno will turn it into polished writing...",
+    General: "Describe what you want the AI to do. Promptuno will engineer the best prompt for {platform}...",
+    Image: "Describe the subject, style, mood, composition, and details you want in the final image prompt...",
+    Code: "Describe the feature, bug, stack, constraints, and output you want the coding prompt to produce...",
+    Vibe: "Describe the tone, brand feel, creative direction, or aesthetic you want Promptuno to sharpen...",
   },
   buttons: {
-    Prompt: "Generate Prompt",
-    Write: "Write Output",
+    Generate: "Generate Prompt",
     NewGeneration: "New Generation",
     Upgrade: "Upgrade to Pro",
     MaybeLater: "Maybe Later",
@@ -19,15 +22,15 @@ const englishCopy = {
   },
   labels: {
     CreateFor: "Optimize for",
-    PromptMode: "Prompt mode",
-    WriteMode: "Write mode",
+    PromptMode: "Prompt focus",
+    WriteMode: "Prompt focus",
     Prompt: "prompt",
-    Writing: "writing",
+    Writing: "prompt",
     WaitMessage: "Please wait a moment",
     Engineering: "Preparing {platform}",
-    Forging: "Creating...",
+    Forging: "Generating...",
     LimitReached: "Free Limit Reached",
-    LimitDescription: "You've reached your 5 free generations. Upgrade to Promptuno Pro to keep creating prompts and polished writing without interruption.",
+    LimitDescription: "You've reached your 5 free prompt generations. Upgrade to Promptuno Pro to keep generating without interruption.",
     LeftCount: "{count} Generations Left",
   },
   refinements: {

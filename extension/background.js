@@ -119,15 +119,23 @@ async function appendList(key, item) {
 }
 
 async function generateWithPromptuno({ action = "prompt", input = "", platform = "ChatGPT", context = "" }) {
+  const category = ["general", "image", "code", "vibe"].includes(String(action).toLowerCase())
+    ? String(action).toLowerCase()
+    : "general";
   const cleanInput = input.trim();
-  if (!cleanInput) throw new Error("Write or select text first.");
+  if (!cleanInput) throw new Error("Type or select text first.");
 
-  const modeInstruction = action === "write"
-    ? "Generate polished usable text for the user's current work context. Keep it useful, direct, and ready to paste."
-    : "Transform the user's rough text into a stronger AI prompt with clear role, objective, context, constraints, and output format.";
+  const modeInstruction = category === "image"
+    ? "Transform the user's rough text into a stronger image-generation prompt with subject, composition, style, lighting, detail, and useful exclusions."
+    : category === "code"
+      ? "Transform the user's rough text into a stronger coding prompt with stack, constraints, output format, acceptance criteria, and edge cases."
+      : category === "vibe"
+        ? "Transform the user's rough text into a stronger tone-and-style prompt with mood, brand direction, references, and aesthetic clarity."
+        : "Transform the user's rough text into a stronger AI prompt with clear role, objective, context, constraints, and output format.";
 
   const system = [
-    "You are Promptuno, a premium prompt and writing assistant.",
+    "You are Promptuno, a premium prompt assistant.",
+    `Prompt category: ${category}.`,
     "Do not copy another product's branding or voice.",
     "Keep the output practical, clean, direct, and useful.",
     `Optimize for ${platform}. Guidance: ${MODEL_GUIDANCE[platform] || "clear AI output"}.`,
@@ -157,7 +165,7 @@ async function generateWithPromptuno({ action = "prompt", input = "", platform =
   const parsed = parseOutput(text);
   return {
     output: parsed.output || text.trim(),
-    note: parsed.note || (action === "write" ? "Written with Promptuno." : "Prompt generated with Promptuno.")
+    note: parsed.note || "Prompt generated with Promptuno."
   };
 }
 

@@ -51,17 +51,24 @@ function getKeywords(request: string) {
     .slice(0, 5);
 }
 
-export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode = "Prompt", lang, request = "" }) => {
+export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode = "General", lang, request = "" }) => {
   const t = translations[lang];
   const [currentStep, setCurrentStep] = useState(0);
   const keywords = getKeywords(request);
   const keywordText = keywords.length ? keywords.join(" / ") : platform;
-  const isWriteMode = mode === "Write";
+  const accentClass =
+    mode === "Image"
+      ? "bg-amber-500"
+      : mode === "Code"
+        ? "bg-cyan-500"
+        : mode === "Vibe"
+          ? "bg-fuchsia-500"
+          : "bg-indigo-500";
 
   const steps = [
     { icon: Search, label: "Reading Your Intent", sub: `Detecting: ${keywordText}` },
-    { icon: ScanSearch, label: isWriteMode ? "Mapping Writing Context" : "Mapping Prompt Context", sub: t.loading.Scanning.replace("{platform}", platform) },
-    { icon: Database, label: isWriteMode ? "Drafting Structure" : "Structuring Prompt", sub: t.loading.Architecting },
+    { icon: ScanSearch, label: `Mapping ${mode} Prompt Context`, sub: t.loading.Scanning.replace("{platform}", platform) },
+    { icon: Database, label: `Structuring ${mode} Prompt`, sub: t.loading.Architecting },
     { icon: Cpu, label: "Sharpening Output", sub: t.loading.Optimizing },
     { icon: BrainCircuit, label: "Ready Soon", sub: "Polishing the final answer" },
   ];
@@ -84,7 +91,7 @@ export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode =
               opacity: [0.1, 0.2, 0.1]
             }}
             transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-            className={cn("w-full h-full rounded-full blur-[100px]", isWriteMode ? "bg-amber-500" : "bg-indigo-500")}
+            className={cn("w-full h-full rounded-full blur-[100px]", accentClass)}
           />
         </div>
 
@@ -120,7 +127,7 @@ export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode =
                 className="absolute inset-0"
               >
                 <div
-                  className={cn("w-2 h-2 rounded-full absolute -top-1 left-1/2 -translate-x-1/2", isWriteMode ? "bg-amber-400" : "bg-indigo-500")}
+                  className={cn("w-2 h-2 rounded-full absolute -top-1 left-1/2 -translate-x-1/2", accentClass.replace("500", "400"))}
                   style={{ left: `${40 + i * 10}%` }}
                 />
               </motion.div>

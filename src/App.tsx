@@ -5,12 +5,10 @@ import { useTheme } from "./hooks/useTheme";
 import { Composer } from "./components/Composer";
 import { PromptResponse } from "./components/PromptResponse";
 import { Pricing } from "./components/Pricing";
-import { RefinePanel } from "./components/RefinePanel";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { LegalView } from "./components/LegalView";
 import { cn } from "./lib/utils";
 import { motion, AnimatePresence } from "motion/react";
-import { Download, X } from "lucide-react";
 
 import { AnalysisLoader } from "./components/AnalysisLoader";
 import { ModeSwitcher } from "./components/ModeSwitcher";
@@ -79,7 +77,7 @@ function parseGeneratedPrompt(text: string, platform: Platform, lang: Language, 
       if (parsed && typeof parsed === "object" && parsed.engineeredPrompt) {
         return {
           isNonsense: Boolean(parsed.isNonsense),
-          goal: String(parsed.goal || (mode === "Write" ? "Polished writing" : `Prompt architecture for ${platform}`)),
+          goal: String(parsed.goal || `${mode} prompt architecture for ${platform}`),
           engineeredPrompt: String(parsed.engineeredPrompt),
           explanation: String(parsed.explanation || "Generated from the user's request."),
         };
@@ -97,7 +95,7 @@ function parseGeneratedPrompt(text: string, platform: Platform, lang: Language, 
 
   return {
     isNonsense: false,
-    goal: mode === "Write" ? "Polished writing" : `Prompt architecture for ${platform}`,
+    goal: `${mode} prompt architecture for ${platform}`,
     engineeredPrompt: normalized || text,
     explanation:
       "The provider returned text instead of strict JSON, so Promptuno converted it into a usable response.",
@@ -171,34 +169,11 @@ CRITICAL OUTPUT RULE: Return only one valid JSON object matching the requested s
 }
 
 function buildRefineQuestions(input: string, mode: AppMode, platform: Platform) {
-  const text = input.trim();
-  const words = text.split(/\s+/).filter(Boolean);
-  const hasHelpfulDetail =
-    words.length > 32 &&
-    /\b(for|audience|format|tone|goal|because|using|with|target|must|avoid)\b/i.test(text);
-
-  if (hasHelpfulDetail) return [];
-
-  const questions =
-    mode === "Write"
-      ? [
-          "Who is this writing for?",
-          "What tone should it have?",
-          "What format should Promptuno return?",
-        ]
-      : [
-          `Who is the ${platform} answer meant for?`,
-          "What tone should the AI use?",
-          "What format should the AI return?",
-        ];
-
-  if (words.length < 10) return questions;
-  if (words.length < 22) return questions.slice(0, 2);
-  return questions.slice(0, 1);
+  return [];
 }
 
 export default function App() {
-  const [mode, setMode] = useState<AppMode>("Prompt");
+  const [mode, setMode] = useState<AppMode>("General");
   const [platform, setPlatform] = useState<Platform>("ChatGPT");
   const [inputValue, setInputValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -209,11 +184,11 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [semanticError, setSemanticError] = useState<string | null>(null);
   const [lang, setLang] = useState<Language>("en");
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [showInstallNotice, setShowInstallNotice] = useState(false);
   const [activeRequest, setActiveRequest] = useState("");
   const [refineQuestions, setRefineQuestions] = useState<string[]>([]);
   const [refineAnswers, setRefineAnswers] = useState<string[]>([]);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [isMobileComposerOpen, setIsMobileComposerOpen] = useState(false);
   
   const { isLimitReached, limit, remaining, increment, reset } = useUsageLimit();
   const { theme, toggleTheme } = useTheme();
@@ -227,27 +202,19 @@ export default function App() {
   };
 
   useEffect(() => {
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      // Only show if not already installed or dismissed
-      const isDismissed = localStorage.getItem('install_notice_dismissed');
-      if (!isDismissed) {
-        setShowInstallNotice(true);
-      }
-    });
+    if (typeof window === "undefined") return;
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const sync = () => setIsMobileViewport(mediaQuery.matches);
+    sync();
+    mediaQuery.addEventListener("change", sync);
+    return () => mediaQuery.removeEventListener("change", sync);
   }, []);
 
-  const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
+  useEffect(() => {
+    if (!isMobileViewport) {
+      setIsMobileComposerOpen(true);
     }
-    setDeferredPrompt(null);
-    setShowInstallNotice(false);
-  };
+  }, [isMobileViewport]);
 
   const handleGenerate = async (refinement?: string) => {
     const inputToUse = refinement || inputValue;
@@ -281,29 +248,19 @@ export default function App() {
     setError(null);
     setRefineQuestions([]);
     setRefineAnswers([]);
+    setIsMobileComposerOpen(true);
 
     try {
-      const systemInstruction = mode === "Write"
-        ? `You are Promptuno Write, a premium writing assistant inside a prompt-first product.
-Your mission is to transform rough notes, requests, and drafts into polished usable writing.
-RESPOND ENTIRELY IN ${lang.toUpperCase()} LANGUAGE.
+      const modeGuidance =
+        mode === "Image"
+          ? "Specialize in image-generation prompts. Include subject, composition, style, lighting, camera feel, texture, color direction, and useful exclusions when appropriate."
+          : mode === "Code"
+            ? "Specialize in coding prompts. Include role, stack, constraints, inputs, outputs, acceptance criteria, edge cases, and debugging or implementation guidance where useful."
+            : mode === "Vibe"
+              ? "Specialize in aesthetic, brand, tone, and creative-direction prompts. Clarify mood, voice, energy, references, and desired emotional effect."
+              : "Specialize in high-performance general prompts for research, strategy, execution, and communication.";
 
-Strict Protocols:
-1. WRITE DIRECTLY: Return polished content the user can copy and use immediately.
-2. CONTEXT SYNC: Preserve the user's original intent, facts, audience, and constraints.
-3. QUALITY: Make the writing clear, modern, calm, useful, and professional.
-4. Nonsense Detection: If the input is gibberish or lacks intent, return JSON with 'isNonsense' true and 'explanation' exactly "Error: I cannot generate writing for this input.".
-5. No Generic AI Suite: Stay focused on writing output, not unrelated tools.
-
-JSON structure:
-{
-  "isNonsense": boolean,
-  "goal": "Writing objective in ${lang.toUpperCase()}",
-  "engineeredPrompt": "The polished writing/content output in ${lang.toUpperCase()}",
-  "explanation": "Brief editorial reasoning in ${lang.toUpperCase()}"
-}
-`
-        : `You are Promptuno, an AI Prompt Architect.
+      const systemInstruction = `You are Promptuno, an AI Prompt Architect.
 Your mission is to transform user intent into elite-tier prompts for ${platform}.
 RESPOND ENTIRELY IN ${lang.toUpperCase()} LANGUAGE.
 
@@ -313,11 +270,12 @@ Strict Protocols:
 3. Platform Fit: Adapt the prompt to ${platform}'s best-known strengths without inventing fake capabilities.
 4. Unique Reasoning: Every 'explanation' must be completely unique.
 5. Elite Formatting: Use Markdown (###, -, >).
+6. Prompt Category: ${modeGuidance}
 
 JSON structure:
 {
   "isNonsense": boolean,
-  "goal": "Persona + Objective in ${lang.toUpperCase()}",
+  "goal": "${mode} prompt strategy in ${lang.toUpperCase()}",
   "engineeredPrompt": "The premium prompt architecture in ${lang.toUpperCase()}",
   "explanation": "Detailed architectural choices in ${lang.toUpperCase()}"
 }
@@ -325,9 +283,7 @@ JSON structure:
 
       const aiPromise = generatePromptResponse(
         systemInstruction,
-        mode === "Write"
-          ? `User said: "${inputToUse}". Write the polished output directly. Optimize for ${platform} style where useful.`
-          : `User said: "${inputToUse}". Generate the best prompt for ${platform}.`,
+        `User said: "${inputToUse}". Generate the best ${mode.toLowerCase()} prompt for ${platform}.`,
       );
 
       // 2. Short 1s buffer for the "Forging" button state to feel reactive
@@ -376,64 +332,13 @@ JSON structure:
   const handleRefine = async (type: RefinementType) => {
     let refinementRequest = "";
     const adaptedPlatform = platform === "ChatGPT" ? "Claude" : "ChatGPT";
-    if (mode === "Write") {
-      if (type === "concise") refinementRequest = `Shorten the following writing while keeping the meaning and usefulness: ${currentResponse?.engineeredPrompt}`;
-      if (type === "technician") refinementRequest = `Sharpen the following writing so it is clearer, more specific, and more persuasive: ${currentResponse?.engineeredPrompt}`;
-      if (type === "corporate") refinementRequest = `Rewrite the following writing in a polished, formal, business-ready tone: ${currentResponse?.engineeredPrompt}`;
-      if (type === "creative") refinementRequest = `Rewrite the following writing to feel warmer, friendlier, and more natural while staying professional: ${currentResponse?.engineeredPrompt}`;
-      if (type === "adapt") refinementRequest = `Rewrite the following content for ${adaptedPlatform}'s style while preserving the user's intent: ${currentResponse?.engineeredPrompt}`;
-    } else {
-      if (type === "concise") refinementRequest = `Make the following prompt as concise as possible while keeping the core instructions: ${currentResponse?.engineeredPrompt}`;
-      if (type === "technician") refinementRequest = `Upgrade the following prompt with extreme technical detail, specific constraints, and complex formatting structures: ${currentResponse?.engineeredPrompt}`;
-      if (type === "corporate") refinementRequest = `Rewrite the following prompt in a polished corporate style for serious workplace use, with executive clarity and professional tone: ${currentResponse?.engineeredPrompt}`;
-      if (type === "creative") refinementRequest = `Rewrite the following prompt to be more creative, distinctive, and exploratory while keeping the user's goal intact: ${currentResponse?.engineeredPrompt}`;
-      if (type === "adapt") refinementRequest = `Adapt the following prompt for ${adaptedPlatform}, preserving intent while matching ${adaptedPlatform}'s best prompt style: ${currentResponse?.engineeredPrompt}`;
-    }
+    if (type === "concise") refinementRequest = `Make the following prompt as concise as possible while keeping the core instructions: ${currentResponse?.engineeredPrompt}`;
+    if (type === "technician") refinementRequest = `Upgrade the following prompt with extreme technical detail, specific constraints, and complex formatting structures: ${currentResponse?.engineeredPrompt}`;
+    if (type === "corporate") refinementRequest = `Rewrite the following prompt in a polished corporate style for serious workplace use, with executive clarity and professional tone: ${currentResponse?.engineeredPrompt}`;
+    if (type === "creative") refinementRequest = `Rewrite the following prompt to be more creative, distinctive, and exploratory while keeping the user's goal intact: ${currentResponse?.engineeredPrompt}`;
+    if (type === "adapt") refinementRequest = `Adapt the following prompt for ${adaptedPlatform}, preserving intent while matching ${adaptedPlatform}'s best prompt style: ${currentResponse?.engineeredPrompt}`;
 
     handleGenerate(refinementRequest);
-  };
-
-  const handleRefineIntent = () => {
-    if (!inputValue.trim() || isGenerating || isAnalyzing || isLimitReached) return;
-
-    const questions = buildRefineQuestions(inputValue, mode, platform);
-    if (!questions.length) {
-      handleGenerate();
-      return;
-    }
-
-    setError(null);
-    setRefineQuestions(questions);
-    setRefineAnswers(questions.map(() => ""));
-  };
-
-  const handleRefineAnswerChange = (index: number, value: string) => {
-    setRefineAnswers((current) => {
-      const next = [...current];
-      next[index] = value;
-      return next;
-    });
-  };
-
-  const handleRefineCancel = () => {
-    setRefineQuestions([]);
-    setRefineAnswers([]);
-  };
-
-  const handleRefineSubmit = () => {
-    const details = refineQuestions
-      .map((question, index) => {
-        const answer = refineAnswers[index]?.trim();
-        return answer ? `- ${question} ${answer}` : "";
-      })
-      .filter(Boolean)
-      .join("\n");
-
-    const refinedInput = details
-      ? `${inputValue.trim()}\n\nClarifying details:\n${details}`
-      : inputValue.trim();
-
-    handleGenerate(refinedInput);
   };
 
   return (
@@ -444,54 +349,27 @@ JSON structure:
         "bg-white dark:bg-[#030303] text-neutral-800 dark:text-neutral-100"
       )}
     >
-      {/* PWA Install Notice */}
-      <AnimatePresence>
-        {showInstallNotice && deferredPrompt && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-6 left-6 right-6 md:left-auto md:right-8 md:w-80 z-[100] backdrop-blur-2xl bg-white/80 dark:bg-black/80 border border-neutral-200 dark:border-white/10 p-5 rounded-[28px] shadow-2xl flex flex-col gap-4"
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
-                  <Download className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-[14px] font-black uppercase tracking-tight">Install Promptuno</h4>
-                  <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">Save Promptuno to your desktop or home screen for instant access.</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => {
-                  setShowInstallNotice(false);
-                  localStorage.setItem('install_notice_dismissed', 'true');
-                }}
-                className="p-1 text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <button
-              onClick={handleInstallClick}
-              className="w-full py-3 bg-black dark:bg-white text-white dark:text-black rounded-xl text-[11px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-lg"
-            >
-              Add to Desktop
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Dynamic Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className={cn(
           "absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] animate-pulse",
-          mode === "Write" ? "bg-amber-500/5 dark:bg-amber-500/10" : "bg-indigo-500/5 dark:bg-indigo-500/10"
+          mode === "Image"
+            ? "bg-amber-500/5 dark:bg-amber-500/10"
+            : mode === "Code"
+              ? "bg-cyan-500/5 dark:bg-cyan-500/10"
+              : mode === "Vibe"
+                ? "bg-fuchsia-500/5 dark:bg-fuchsia-500/10"
+                : "bg-indigo-500/5 dark:bg-indigo-500/10"
         )}></div>
         <div className={cn(
           "absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] animate-pulse",
-          mode === "Write" ? "bg-indigo-500/5 dark:bg-indigo-500/10" : "bg-amber-500/5 dark:bg-amber-500/10"
+          mode === "Image"
+            ? "bg-indigo-500/5 dark:bg-indigo-500/10"
+            : mode === "Code"
+              ? "bg-emerald-500/5 dark:bg-emerald-500/10"
+              : mode === "Vibe"
+                ? "bg-amber-500/5 dark:bg-amber-500/10"
+                : "bg-amber-500/5 dark:bg-amber-500/10"
         )} style={{ animationDelay: '2s' }}></div>
       </div>
 
@@ -521,7 +399,17 @@ JSON structure:
             )}>{remaining} / {limit} Free</span>
           </div>
           
-          <LanguageSwitcher current={lang} onSelect={setLang} mode={mode} />
+          <div className="hidden md:block">
+            <LanguageSwitcher current={lang} onSelect={setLang} mode={mode} />
+          </div>
+          <a
+            href="https://github.com/promptuno/promptuno-app/tree/main/extension"
+            target="_blank"
+            rel="noreferrer"
+            className="hidden lg:inline-flex px-3 py-2 rounded-full border text-[9px] font-black uppercase tracking-widest transition-all border-neutral-200 dark:border-white/10 text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
+          >
+            Use Promptuno in Chrome
+          </a>
           <button
             type="button"
             onClick={() => setView("pricing")}
@@ -570,23 +458,12 @@ JSON structure:
                       usageRemaining={remaining}
                       usageLimit={limit}
                       onUpgrade={() => setView("pricing")}
-                      onRefineIntent={handleRefineIntent}
                       lang={lang}
+                      isMobileViewport={isMobileViewport}
+                      isMobileComposerOpen={isMobileComposerOpen}
+                      onMobileComposerOpen={() => setIsMobileComposerOpen(true)}
+                      onMobileComposerClose={() => setIsMobileComposerOpen(false)}
                     />
-
-                    <AnimatePresence>
-                      {refineQuestions.length > 0 && (
-                        <RefinePanel
-                          questions={refineQuestions}
-                          answers={refineAnswers}
-                          onAnswerChange={handleRefineAnswerChange}
-                          onCancel={handleRefineCancel}
-                          onSubmit={handleRefineSubmit}
-                          mode={mode}
-                          platform={platform}
-                        />
-                      )}
-                    </AnimatePresence>
                     
                     {error && (
                       <motion.div 
@@ -672,12 +549,23 @@ JSON structure:
 
       {/* Footer Minimal */}
       <footer className={cn(
-        "px-8 py-6 flex items-center justify-between border-t backdrop-blur-sm",
+        "px-4 md:px-8 py-6 flex flex-col md:flex-row items-center justify-between gap-4 border-t backdrop-blur-sm",
         "bg-white/50 dark:bg-neutral-950/50 border-neutral-50 dark:border-neutral-900"
       )}>
-        <div className="flex gap-6">
+        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6">
           <button onClick={() => setView("privacy")} className="text-[10px] font-bold text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 uppercase tracking-widest transition-colors">{lang === 'fr' ? 'CONFIDENTIALITÉ' : (lang === 'ar' ? 'الخصوصية' : (lang === 'tr' ? 'GİZLİLİK' : (lang === 'ru' ? 'КОНФИДЕНЦИАЛЬНОСТЬ' : 'PRIVACY')))}</button>
           <button onClick={() => setView("terms")} className="text-[10px] font-bold text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 uppercase tracking-widest transition-colors">{lang === 'fr' ? 'CONDITIONS' : (lang === 'ar' ? 'البنود' : (lang === 'tr' ? 'KOŞULLAR' : (lang === 'ru' ? 'УСЛОВИЯ' : 'TERMS')))}</button>
+          <a
+            href="https://github.com/promptuno/promptuno-app/tree/main/extension"
+            target="_blank"
+            rel="noreferrer"
+            className="text-[10px] font-bold text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 uppercase tracking-widest transition-colors"
+          >
+            Chrome
+          </a>
+          <div className="md:hidden">
+            <LanguageSwitcher current={lang} onSelect={setLang} mode={mode} />
+          </div>
         </div>
         <span className="text-[10px] font-bold text-neutral-300 dark:text-neutral-700 tracking-widest uppercase">© 2026 PROMPTUNO</span>
       </footer>

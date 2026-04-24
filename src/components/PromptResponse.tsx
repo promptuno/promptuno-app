@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Check, ChevronRight, Copy, RotateCcw, Scissors, Sparkles, Wand2, Zap } from "lucide-react";
+import { Check, ChevronRight, Copy, RotateCcw, Scissors, Sparkles, Zap } from "lucide-react";
 import { AppMode, GeneratedPrompt, Language, Platform, RefinementType } from "../types";
 import { cn } from "../lib/utils";
 import { motion, AnimatePresence } from "motion/react";
@@ -28,7 +28,6 @@ export const PromptResponse: React.FC<PromptResponseProps> = ({
   const t = translations[lang];
   const [copied, setCopied] = useState(false);
   const [isTypingComplete, setIsTypingComplete] = useState(false);
-  const isWriteMode = mode === "Write";
 
   const handleCopy = () => {
     navigator.clipboard.writeText(response.engineeredPrompt);
@@ -36,25 +35,18 @@ export const PromptResponse: React.FC<PromptResponseProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const responseLabel = isWriteMode ? "Writing Ready" : "Prompt Ready";
-  const goalLabel = isWriteMode ? "Writing Strategy" : "Prompt Strategy";
-  const outputLabel = isWriteMode ? "Polished Output" : "Engineered Prompt";
-  const reasoningLabel = isWriteMode ? "Editorial Reasoning" : "Prompt Architecture";
+  const responseLabel = "Prompt Ready";
+  const goalLabel = `${mode} Prompt Strategy`;
+  const outputLabel = "Engineered Prompt";
+  const reasoningLabel = "Prompt Architecture";
 
-  const refinementActions: Array<{ type: RefinementType; label: string; icon: React.ReactNode }> = isWriteMode
-    ? [
-        { type: "concise", label: "Shorten", icon: <Scissors className="w-4 h-4 transition-transform group-hover:scale-110" /> },
-        { type: "technician", label: "Sharpen", icon: <Zap className="w-4 h-4 transition-transform group-hover:scale-110 group-hover:text-amber-500" /> },
-        { type: "corporate", label: "Formalize", icon: <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" /> },
-        { type: "creative", label: "Friendlier", icon: <Sparkles className="w-4 h-4 transition-transform group-hover:scale-110" /> },
-      ]
-    : [
-        { type: "concise", label: t.refinements.Concise, icon: <Scissors className="w-4 h-4 transition-transform group-hover:scale-110" /> },
-        { type: "technician", label: t.refinements.Technician, icon: <Zap className="w-4 h-4 transition-transform group-hover:scale-110 group-hover:text-amber-500" /> },
-        { type: "corporate", label: "More Corporate", icon: <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" /> },
-        { type: "creative", label: "More Creative", icon: <Sparkles className="w-4 h-4 transition-transform group-hover:scale-110" /> },
-        { type: "adapt", label: t.refinements.Adapt, icon: <RotateCcw className="w-4 h-4 transition-transform group-hover:rotate-180 duration-500" /> },
-      ];
+  const refinementActions: Array<{ type: RefinementType; label: string; icon: React.ReactNode }> = [
+    { type: "concise", label: t.refinements.Concise, icon: <Scissors className="w-4 h-4 transition-transform group-hover:scale-110" /> },
+    { type: "technician", label: t.refinements.Technician, icon: <Zap className="w-4 h-4 transition-transform group-hover:scale-110 group-hover:text-amber-500" /> },
+    { type: "corporate", label: "More Corporate", icon: <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" /> },
+    { type: "creative", label: "More Creative", icon: <Sparkles className="w-4 h-4 transition-transform group-hover:scale-110" /> },
+    { type: "adapt", label: t.refinements.Adapt, icon: <RotateCcw className="w-4 h-4 transition-transform group-hover:rotate-180 duration-500" /> },
+  ];
 
   return (
     <motion.div
@@ -75,11 +67,7 @@ export const PromptResponse: React.FC<PromptResponseProps> = ({
 
       <div className="flex gap-3 md:gap-5">
         <div className="w-8 h-8 rounded-full items-center justify-center flex-shrink-0 shadow-lg ring-4 hidden sm:flex bg-black dark:bg-white ring-black/5 dark:ring-white/5">
-          {isWriteMode ? (
-            <Wand2 className="w-4 h-4 text-white dark:text-black" />
-          ) : (
-            <div className="w-3 h-3 border-2 border-white dark:border-black rotate-45" />
-          )}
+          <div className="w-3 h-3 border-2 border-white dark:border-black rotate-45" />
         </div>
 
         <div className="flex-1 backdrop-blur-3xl border rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden bg-white/50 dark:bg-[#080808]/50 border-neutral-200 dark:border-white/10">
@@ -158,7 +146,7 @@ export const PromptResponse: React.FC<PromptResponseProps> = ({
                     className="group px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-[0.15em] transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-xl bg-black dark:bg-white text-white dark:text-black"
                   >
                     <RotateCcw className="w-4 h-4 transition-transform group-hover:rotate-180 duration-500" />
-                    {isWriteMode ? "Rewrite" : t.refinements.Reforge}
+                    {t.refinements.Reforge}
                   </button>
                   {refinementActions.map((action) => (
                     <button

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { ArrowUp, Mic, MicOff, PenLine, Rocket, SlidersHorizontal, Sparkles } from "lucide-react";
+import { ArrowUp, Mic, MicOff, Rocket, Sparkles, X } from "lucide-react";
 import { cn } from "../lib/utils";
 import { AppMode, Platform } from "../types";
 import { PLATFORMS } from "../constants";
@@ -21,8 +21,11 @@ interface ComposerProps {
   usageRemaining?: number;
   usageLimit?: number;
   onUpgrade?: () => void;
-  onRefineIntent?: () => void;
   lang: Language;
+  isMobileViewport?: boolean;
+  isMobileComposerOpen?: boolean;
+  onMobileComposerOpen?: () => void;
+  onMobileComposerClose?: () => void;
 }
 
 export const Composer: React.FC<ComposerProps> = ({
@@ -38,8 +41,11 @@ export const Composer: React.FC<ComposerProps> = ({
   usageRemaining = 0,
   usageLimit = 5,
   onUpgrade,
-  onRefineIntent,
   lang,
+  isMobileViewport = false,
+  isMobileComposerOpen = true,
+  onMobileComposerOpen,
+  onMobileComposerClose,
 }) => {
   const t = translations[lang];
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -48,7 +54,6 @@ export const Composer: React.FC<ComposerProps> = ({
   const [placeholderText, setPlaceholderText] = useState("");
   const recognitionRef = useRef<any>(null);
   const usagePercent = Math.max(0, Math.min(100, (usageRemaining / usageLimit) * 100));
-  const isWriteMode = mode === "Write";
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -58,21 +63,35 @@ export const Composer: React.FC<ComposerProps> = ({
   }, [value]);
 
   useEffect(() => {
+    if (isMobileViewport && !isMobileComposerOpen) return;
     textareaRef.current?.focus({ preventScroll: true });
-  }, [mode, platform]);
+  }, [mode, platform, isMobileViewport, isMobileComposerOpen]);
 
   useEffect(() => {
-    const examples = isWriteMode
-      ? [
-          "Turn these rough notes into a polished client follow-up email...",
-          "Write a concise outreach message for a partnership conversation...",
-          "Polish this messy update into a clear executive summary...",
-        ]
-      : [
-          `Create a stronger ${platform} prompt for a startup launch plan...`,
-          `Turn my rough idea into a detailed ${platform} prompt...`,
-          "Create a prompt that gives step-by-step, premium answers...",
-        ];
+    const examples =
+      mode === "Image"
+        ? [
+            "Create an image prompt for a cinematic fashion campaign at golden hour...",
+            "Turn my rough concept into a polished product-render image prompt...",
+            "Build an image prompt with lighting, lens, style, and composition...",
+          ]
+        : mode === "Code"
+          ? [
+              `Create a stronger ${platform} coding prompt for a full-stack feature build...`,
+              "Turn my bug report into a precise debugging prompt with acceptance criteria...",
+              "Create a code prompt with stack, constraints, edge cases, and output format...",
+            ]
+          : mode === "Vibe"
+            ? [
+                "Build a prompt that sharpens this brand voice into a confident premium tone...",
+                "Turn my rough idea into a prompt for naming, mood, and creative direction...",
+                "Create a prompt that helps the AI capture the exact aesthetic and feel...",
+              ]
+            : [
+                `Create a stronger ${platform} prompt for a startup launch plan...`,
+                `Turn my rough idea into a detailed ${platform} prompt...`,
+                "Create a prompt that gives step-by-step, premium answers...",
+              ];
 
     let exampleIndex = 0;
     let charIndex = 0;
@@ -108,7 +127,7 @@ export const Composer: React.FC<ComposerProps> = ({
 
     tick();
     return () => window.clearTimeout(timeout);
-  }, [isWriteMode, platform]);
+  }, [mode, platform]);
 
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -155,6 +174,13 @@ export const Composer: React.FC<ComposerProps> = ({
       onSend();
     }
   };
+
+  const openMobileComposer = () => {
+    onMobileComposerOpen?.();
+    window.setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 120);
+  };
+
+  const showCollapsedComposer = isMobileViewport && !isMobileComposerOpen && !value.trim();
 
   return (
     <form
@@ -213,10 +239,10 @@ export const Composer: React.FC<ComposerProps> = ({
         <div className="flex flex-col gap-3 mb-5 md:mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <span className="text-[11px] md:text-[14px] font-black uppercase tracking-[0.16em] md:tracking-[0.2em] text-neutral-400 dark:text-neutral-600 text-center sm:text-left">
-              {isWriteMode ? "Write with" : "Prompt for"}
+              {mode} prompts for
             </span>
             <span className="text-[10px] font-black uppercase tracking-[0.16em] text-neutral-400 dark:text-neutral-500 text-center sm:text-right">
-              {isWriteMode ? "Polished content output" : "AI prompt engineering"}
+              Perfect prompt engineering
             </span>
           </div>
 
@@ -247,29 +273,64 @@ export const Composer: React.FC<ComposerProps> = ({
 
           {modelGuidance[platform] && (
             <p className="text-[11px] leading-relaxed font-medium text-center sm:text-left text-neutral-400 dark:text-neutral-500">
-              {isWriteMode
-                ? `${platform} style guidance for clearer drafts, replies, summaries, and business writing.`
-                : modelGuidance[platform]}
+              {mode === "Image"
+                ? `Use ${platform} to sharpen subject, style, lighting, composition, and visual constraints.`
+                : mode === "Code"
+                  ? `${platform} prompts work best with stack details, acceptance criteria, edge cases, and exact output format.`
+                  : mode === "Vibe"
+                    ? `${platform} can sharpen tone, mood, brand direction, and aesthetic clarity.`
+                    : modelGuidance[platform]}
             </p>
           )}
         </div>
 
-        <div className="flex items-start gap-3 md:gap-4">
-          {isWriteMode ? (
-            <PenLine className="w-6 h-6 text-neutral-300 dark:text-neutral-700 mt-1" />
-          ) : (
+        {showCollapsedComposer ? (
+          <button
+            type="button"
+            onClick={openMobileComposer}
+            className="w-full text-left rounded-[28px] border border-neutral-100 dark:border-white/5 bg-neutral-50/70 dark:bg-white/[0.03] px-4 py-5 transition-all hover:border-neutral-200 dark:hover:border-white/10"
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-white/5 flex items-center justify-center shadow-sm">
+                <Sparkles className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[11px] font-black uppercase tracking-[0.16em] text-neutral-400 dark:text-neutral-500">
+                  {mode} prompts
+                </div>
+                <div className="mt-2 text-[15px] font-semibold text-neutral-900 dark:text-white leading-relaxed">
+                  {placeholderText || t.placeholders[mode].replace("{platform}", platform)}
+                </div>
+                <div className="mt-3 text-[11px] font-bold text-neutral-400 dark:text-neutral-500">
+                  Tap to start
+                </div>
+              </div>
+            </div>
+          </button>
+        ) : (
+          <div className="flex items-start gap-3 md:gap-4">
             <Sparkles className="w-6 h-6 text-neutral-300 dark:text-neutral-700 mt-1" />
-          )}
-          <textarea
-            ref={textareaRef}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={placeholderText || t.placeholders[mode].replace("{platform}", platform)}
-            className="flex-1 bg-transparent border-none focus:ring-0 resize-none text-[17px] md:text-[22px] font-medium leading-relaxed p-0 min-h-[150px] md:min-h-[140px] max-h-[500px] text-neutral-900 dark:text-white placeholder-neutral-200 dark:placeholder-neutral-800"
-            disabled={disabled || isLimitReached}
-          />
-        </div>
+            <textarea
+              ref={textareaRef}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholderText || t.placeholders[mode].replace("{platform}", platform)}
+              className="flex-1 bg-transparent border-none focus:ring-0 resize-none text-[17px] md:text-[22px] font-medium leading-relaxed p-0 min-h-[150px] md:min-h-[140px] max-h-[500px] text-neutral-900 dark:text-white placeholder-neutral-200 dark:placeholder-neutral-800"
+              disabled={disabled || isLimitReached}
+            />
+            {isMobileViewport && (
+              <button
+                type="button"
+                onClick={onMobileComposerClose}
+                className="mt-1 p-2 rounded-xl text-neutral-400 hover:text-neutral-900 dark:text-neutral-500 dark:hover:text-white transition-colors"
+                aria-label="Close composer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        )}
 
         <div className="mt-5 rounded-2xl border p-3 flex items-center justify-between gap-3 bg-neutral-50/70 dark:bg-white/[0.03] border-neutral-100 dark:border-white/5">
           <div>
@@ -307,21 +368,6 @@ export const Composer: React.FC<ComposerProps> = ({
           </div>
 
           <button
-            type="button"
-            disabled={disabled || !value.trim() || isLimitReached}
-            onClick={onRefineIntent}
-            className={cn(
-              "group w-full sm:w-auto px-5 py-4 rounded-[20px] md:rounded-[24px] text-[12px] md:text-[13px] font-black uppercase tracking-[0.12em] transition-all duration-300 flex items-center justify-center gap-2 order-1 sm:order-2 border",
-              value.trim() && !disabled && !isLimitReached
-                ? "border-neutral-200 dark:border-white/10 text-neutral-500 dark:text-neutral-400 hover:border-neutral-900 dark:hover:border-white hover:text-neutral-900 dark:hover:text-white"
-                : "border-neutral-100 dark:border-white/5 text-neutral-300 dark:text-neutral-800 cursor-not-allowed"
-            )}
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-            {isWriteMode ? "Add Context" : "Refine First"}
-          </button>
-
-          <button
             type="submit"
             disabled={disabled || !value.trim() || isLimitReached}
             className={cn(
@@ -332,7 +378,7 @@ export const Composer: React.FC<ComposerProps> = ({
             )}
           >
             <span className="relative z-10 flex items-center gap-3">
-              {isGenerating ? t.labels.Forging : t.buttons[mode]}
+              {isGenerating ? t.labels.Forging : t.buttons.Generate}
               <div className="relative w-5 h-5 flex items-center justify-center">
                 <AnimatePresence mode="wait">
                   {isGenerating ? (

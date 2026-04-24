@@ -1,15 +1,13 @@
 # Promptuno Chrome Extension
 
-Promptuno for Chrome is the compact browser-native layer of Promptuno. It uses the official https://www.promptuno.chat/ product language and adds Prompt mode and Write mode directly where users work.
+Promptuno for Chrome is the compact browser-native layer of Promptuno. It uses the official https://www.promptuno.chat/ product language and adds prompt generation directly where users work.
 
 ## What It Does
 
-- Generates better prompts in Prompt mode.
-- Turns rough notes and drafts into polished writing in Write mode.
+- Generates better prompts in General, Image, Code, and Vibe categories.
 - Adds a subtle inline Promptuno button near text inputs.
 - Works from the extension popup on any page.
 - Supports ChatGPT, Claude, Gemini, and Copilot as the primary visible models.
-- Supports email and document drafting as a premium direct-writing workflow.
 - Uses the same 5 free generations limit as the web product.
 - Shows the same calm Pro paywall after the free limit.
 - Saves local prompt history and saved prompts as a foundation for the future Pro library.

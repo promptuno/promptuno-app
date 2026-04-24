@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "motion/react";
 import { AppMode } from "../types";
-import { PenLine, Sparkles } from "lucide-react";
+import { Braces, Image as ImageIcon, Palette, Sparkles } from "lucide-react";
 import { cn } from "../lib/utils";
 
 interface ModeSwitcherProps {
@@ -16,23 +16,35 @@ const modes: Array<{
   icon: React.ReactNode;
 }> = [
   {
-    id: "Prompt",
-    label: "Prompt",
-    description: "Engineer better prompts",
+    id: "General",
+    label: "General",
+    description: "Everyday prompt engineering",
     icon: <Sparkles className="w-4 h-4" />,
   },
   {
-    id: "Write",
-    label: "Write",
-    description: "Polish usable writing",
-    icon: <PenLine className="w-4 h-4" />,
+    id: "Image",
+    label: "Image",
+    description: "Visual prompt detail",
+    icon: <ImageIcon className="w-4 h-4" />,
+  },
+  {
+    id: "Code",
+    label: "Code",
+    description: "Developer-ready prompts",
+    icon: <Braces className="w-4 h-4" />,
+  },
+  {
+    id: "Vibe",
+    label: "Vibe",
+    description: "Tone, style, and feel",
+    icon: <Palette className="w-4 h-4" />,
   },
 ];
 
 export const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ mode, onChange }) => {
   return (
     <div className="flex justify-center mb-8 md:mb-12 px-1">
-      <div className="w-full max-w-2xl bg-neutral-100/55 dark:bg-white/5 backdrop-blur-3xl p-1.5 rounded-[24px] md:rounded-[28px] border border-neutral-200/50 dark:border-white/10 grid grid-cols-2 gap-1.5 shadow-2xl">
+      <div className="w-full max-w-3xl bg-neutral-100/55 dark:bg-white/5 backdrop-blur-3xl p-1.5 rounded-[24px] md:rounded-[28px] border border-neutral-200/50 dark:border-white/10 grid grid-cols-2 md:grid-cols-4 gap-1.5 shadow-2xl">
         {modes.map((item) => {
           const isActive = mode === item.id;
 

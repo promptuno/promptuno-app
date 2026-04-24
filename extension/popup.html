@@ -13,7 +13,7 @@
           <div class="mark"></div>
           <div>
             <h1>Promptuno</h1>
-            <p>Prompt and write anywhere.</p>
+            <p>Better prompts anywhere.</p>
           </div>
         </div>
         <div id="usagePill" class="usage-pill">5 / 5 free</div>
@@ -21,7 +21,7 @@
 
       <section id="paywall" class="paywall hidden">
         <h2>You've reached your free prompt limit.</h2>
-        <p>Upgrade to Promptuno Pro to keep creating prompts and polished writing without interruption.</p>
+        <p>Upgrade to Promptuno Pro to keep generating prompts without interruption.</p>
         <p class="muted">Use Promptuno on the web and inside your browser.</p>
         <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
           <input type="hidden" name="cmd" value="_xclick" />
@@ -37,8 +37,10 @@
 
       <section id="workspace" class="workspace">
         <div class="mode-row" role="tablist" aria-label="Promptuno mode">
-          <button class="mode active" data-mode="prompt">Prompt</button>
-          <button class="mode" data-mode="write">Write</button>
+          <button class="mode active" data-mode="general">General</button>
+          <button class="mode" data-mode="image">Image</button>
+          <button class="mode" data-mode="code">Code</button>
+          <button class="mode" data-mode="vibe">Vibe</button>
         </div>
 
         <div id="editorPanel">
@@ -51,11 +53,6 @@
           </div>
 
           <textarea id="input" placeholder="Paste a rough prompt or describe what you want the AI to do..."></textarea>
-
-          <div id="refineBox" class="refine-box hidden">
-            <div class="mini-title">A few details will make this stronger</div>
-            <div id="questions"></div>
-          </div>
 
           <button id="generate" class="primary">Generate Prompt</button>
           <p id="status" class="status"></p>

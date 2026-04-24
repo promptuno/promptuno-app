@@ -70,7 +70,7 @@ async function improveText(text) {
 
   const response = await chrome.runtime.sendMessage({
     type: "PROMPTUNO_GENERATE",
-    action: "prompt",
+    action: "general",
     platform: detectPlatform(),
     input,
     context: location.hostname
@@ -120,7 +120,7 @@ function renderPaywall() {
   panel.style.left = `${Math.max(12, window.scrollX + window.innerWidth - 380)}px`;
   panel.innerHTML = `
     <h3>You've reached your free prompt limit.</h3>
-    <p>Upgrade to Promptuno Pro to keep creating prompts and polished writing without interruption.</p>
+    <p>Upgrade to Promptuno Pro to keep generating prompts without interruption.</p>
     <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
       <input type="hidden" name="cmd" value="_xclick" />
       <input type="hidden" name="business" value="AFI5@OUTLOOK.COM" />
@@ -129,7 +129,7 @@ function renderPaywall() {
       <input type="hidden" name="currency_code" value="USD" />
       <input type="hidden" name="no_shipping" value="1" />
       <input type="hidden" name="custom" value="promptuno-pro-extension-inline" />
-      <button type="submit">Pay $15 with PayPal</button>
+      <button type="submit">Pay with PayPal</button>
     </form>
     <div class="promptuno-actions"><button class="secondary" data-close>Close</button></div>
   `;

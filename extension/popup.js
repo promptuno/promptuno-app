@@ -1,9 +1,7 @@
 const state = {
-  mode: "prompt",
+  mode: "general",
   platform: "ChatGPT",
-  output: "",
-  questions: [],
-  lastInput: ""
+  output: ""
 };
 
 const els = {
@@ -20,8 +18,6 @@ const els = {
   copyOutput: document.getElementById("copyOutput"),
   saveOutput: document.getElementById("saveOutput"),
   insertOutput: document.getElementById("insertOutput"),
-  refineBox: document.getElementById("refineBox"),
-  questions: document.getElementById("questions"),
   editorPanel: document.getElementById("editorPanel"),
   libraryPanel: document.getElementById("libraryPanel"),
   savedList: document.getElementById("savedList"),
@@ -34,6 +30,8 @@ async function init() {
   await refreshUsage();
   await loadActiveSelection();
   bindEvents();
+  renderMode();
+  await renderLibrary();
 }
 
 function bindEvents() {
@@ -49,6 +47,7 @@ function bindEvents() {
     button.addEventListener("click", () => {
       state.platform = button.dataset.platform;
       els.platforms.forEach((item) => item.classList.toggle("active", item === button));
+      renderMode();
     });
   });
 
@@ -60,6 +59,14 @@ function bindEvents() {
 
 async function loadActiveSelection() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (tab?.url) {
+    const detectedPlatform = detectPlatformFromUrl(tab.url);
+    if (detectedPlatform) {
+      state.platform = detectedPlatform;
+      els.platforms.forEach((item) => item.classList.toggle("active", item.dataset.platform === detectedPlatform));
+    }
+  }
+
   if (!tab?.id) return;
   chrome.tabs.sendMessage(tab.id, { type: "PROMPTUNO_GET_ACTIVE_TEXT" }, (response) => {
     if (chrome.runtime.lastError || !response?.text) return;
@@ -68,20 +75,18 @@ async function loadActiveSelection() {
 }
 
 function renderMode() {
+  const placeholders = {
+    general: "Paste a rough prompt or describe what you want the AI to do...",
+    image: "Describe the scene, style, lighting, composition, and image details you want...",
+    code: "Describe the bug, feature, stack, constraints, and output you want from the prompt...",
+    vibe: "Describe the mood, tone, brand feel, or aesthetic direction you want Promptuno to sharpen..."
+  };
+
   els.editorPanel.classList.remove("hidden");
   els.libraryPanel.classList.add("hidden");
-  els.refineBox.classList.add("hidden");
   els.status.textContent = "";
-
-  if (state.mode === "prompt") {
-    els.input.placeholder = "Paste a rough prompt or describe what you want the AI to do...";
-    els.generate.textContent = "Generate Prompt";
-  }
-
-  if (state.mode === "write") {
-    els.input.placeholder = "Paste rough notes, an email idea, a reply, or a messy draft...";
-    els.generate.textContent = "Write Output";
-  }
+  els.input.placeholder = placeholders[state.mode] || placeholders.general;
+  els.generate.textContent = "Generate Prompt";
 }
 
 async function handleGenerate() {
@@ -93,34 +98,16 @@ async function handleGenerate() {
 
   const input = els.input.value.trim();
   if (!input) {
-    els.status.textContent = "Write or select something first.";
+    els.status.textContent = "Type or select text first.";
     return;
   }
-
-  if (state.mode === "prompt" && state.questions.length === 0) {
-    const questions = buildQuestions(input);
-    if (questions.length) {
-      renderQuestions(questions);
-      state.questions = questions;
-      state.lastInput = input;
-      els.generate.textContent = "Generate Stronger Prompt";
-      return;
-    }
-  }
-
-  const refinedAnswers = [...document.querySelectorAll("[data-question-answer]")]
-    .map((inputEl) => inputEl.value.trim())
-    .filter(Boolean);
-  const finalInput = refinedAnswers.length
-    ? `${state.lastInput || input}\n\nAdditional context:\n${refinedAnswers.map((answer, index) => `${index + 1}. ${answer}`).join("\n")}`
-    : input;
 
   setBusy(true);
   const response = await chrome.runtime.sendMessage({
     type: "PROMPTUNO_GENERATE",
     action: state.mode,
     platform: state.platform,
-    input: finalInput,
+    input,
     context: "Promptuno Chrome extension popup"
   });
   setBusy(false);
@@ -139,43 +126,15 @@ async function handleGenerate() {
   els.output.textContent = state.output;
   els.outputWrap.classList.remove("hidden");
   els.status.textContent = response.result.note || "Ready.";
-  state.questions = [];
-  els.refineBox.classList.add("hidden");
   await renderLibrary();
   await refreshUsage();
-}
-
-function renderQuestions(questions) {
-  els.questions.innerHTML = "";
-  questions.forEach((question) => {
-    const wrap = document.createElement("div");
-    wrap.className = "question";
-    wrap.innerHTML = `
-      <label>${escapeHtml(question)}</label>
-      <input data-question-answer type="text" placeholder="Short answer" />
-    `;
-    els.questions.appendChild(wrap);
-  });
-  els.refineBox.classList.remove("hidden");
-}
-
-function buildQuestions(input) {
-  const words = input.split(/\s+/).filter(Boolean);
-  const vague = words.length < 16 || !/[.!?]/.test(input) || /thing|stuff|something|help|make it|better/i.test(input);
-  if (!vague) return [];
-
-  return [
-    "What should the final answer help you accomplish?",
-    "Who is the audience or target user?",
-    "What tone or format would be most useful?"
-  ];
 }
 
 async function saveOutput() {
   if (!state.output) return;
   await chrome.runtime.sendMessage({
     type: "PROMPTUNO_SAVE_PROMPT",
-    title: `${state.platform} prompt`,
+    title: `${state.platform} ${capitalize(state.mode)} prompt`,
     text: state.output
   });
   els.status.textContent = "Saved locally.";
@@ -202,7 +161,7 @@ async function renderLibrary() {
 function renderList(container, title, items) {
   container.innerHTML = `<div class="mini-title">${title}</div>`;
   if (!items.length) {
-    container.innerHTML += `<div class="list-item"><span>No items yet. Improve or save a prompt to build your workspace.</span></div>`;
+    container.innerHTML += `<div class="list-item"><span>No items yet. Generate or save a prompt to build your workspace.</span></div>`;
     return;
   }
 
@@ -231,8 +190,28 @@ function showPaywall(hideWorkspace = true) {
 
 function setBusy(isBusy) {
   els.generate.disabled = isBusy;
-  els.generate.textContent = isBusy ? "Working..." : state.mode === "write" ? "Write Output" : "Generate Prompt";
+  els.generate.textContent = isBusy ? "Working..." : "Generate Prompt";
   els.status.textContent = isBusy ? "Promptuno is shaping the result..." : "";
+}
+
+function detectPlatformFromUrl(url) {
+  const normalized = String(url).toLowerCase();
+  if (normalized.includes("claude.ai")) return "Claude";
+  if (normalized.includes("gemini.google.com") || normalized.includes("aistudio.google.com")) return "Gemini";
+  if (
+    normalized.includes("copilot.microsoft.com") ||
+    normalized.includes("office.com") ||
+    normalized.includes("outlook.live.com") ||
+    normalized.includes("outlook.office.com")
+  ) {
+    return "Copilot";
+  }
+  if (normalized.includes("chatgpt.com") || normalized.includes("chat.openai.com")) return "ChatGPT";
+  return null;
+}
+
+function capitalize(value) {
+  return String(value).charAt(0).toUpperCase() + String(value).slice(1);
 }
 
 function escapeHtml(value) {

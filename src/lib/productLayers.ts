@@ -3,7 +3,7 @@ import { Platform } from "../types";
 export const PRIMARY_MODEL_LIMIT = 4;
 
 export const modelGuidance: Partial<Record<Platform, string>> = {
-  ChatGPT: "Structured prompts for writing, analysis, and workplace tasks.",
+  ChatGPT: "Structured prompts for analysis, planning, and workplace tasks.",
   Claude: "Deeper prompts for strategy, synthesis, and long-form thinking.",
   Gemini: "Prompts for productivity, workflows, and research.",
   Copilot: "Prompts for documents, meetings, and enterprise work.",
@@ -16,7 +16,7 @@ export const premiumLayers = [
   },
   {
     title: "Saved Prompts",
-    description: "Keep reusable prompts, polished drafts, brand instructions, and repeat workflows ready.",
+    description: "Keep reusable prompts, brand instructions, and repeat workflows ready.",
   },
   {
     title: "Prompt Packs",
@@ -32,6 +32,6 @@ export const premiumLayers = [
   },
   {
     title: "Advanced Modes",
-    description: "More control over prompt depth, writing tone, output format, platform adaptation, and style.",
+    description: "More control over prompt depth, tone direction, output format, platform adaptation, and style.",
   },
 ];
