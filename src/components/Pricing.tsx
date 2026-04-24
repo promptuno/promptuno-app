@@ -1,7 +1,6 @@
 import React from "react";
-import { Check, Layers } from "lucide-react";
+import { Check } from "lucide-react";
 import { motion } from "motion/react";
-import { premiumLayers } from "../lib/productLayers";
 import { PRO_PLAN_PRICE } from "../lib/payments";
 import { PayPalCheckout } from "./PayPalCheckout";
 
@@ -36,7 +35,7 @@ export const Pricing: React.FC = () => {
   ];
 
   return (
-    <div className="w-full max-w-5xl mx-auto py-8 md:py-12 px-4 md:px-6 space-y-8">
+    <div className="w-full max-w-4xl mx-auto py-8 md:py-12 px-4 md:px-6 space-y-6">
       <div className="grid md:grid-cols-2 gap-6 md:gap-8">
         {plans.map((plan, i) => (
           <motion.div
@@ -93,40 +92,23 @@ export const Pricing: React.FC = () => {
           </motion.div>
         ))}
       </div>
-
-      <div className="rounded-[28px] border border-neutral-100 dark:border-white/10 bg-white/60 dark:bg-white/[0.03] backdrop-blur-2xl p-5 md:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+      <div className="flex items-center justify-between gap-4 rounded-[24px] border border-neutral-100 dark:border-white/10 bg-white/60 dark:bg-white/[0.03] backdrop-blur-2xl px-5 py-4">
+        <div>
           <div className="text-[11px] font-black uppercase tracking-[0.16em] text-neutral-400 dark:text-neutral-500">
             Use Promptuno in Chrome
           </div>
-          <a
-            href="https://github.com/promptuno/promptuno-app/tree/main/extension"
-            target="_blank"
-            rel="noreferrer"
-            className="text-[11px] font-bold text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors"
-          >
-            Open the Chrome extension
-          </a>
-        </div>
-
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-9 h-9 rounded-2xl bg-neutral-900 dark:bg-white text-white dark:text-black flex items-center justify-center">
-            <Layers className="w-4 h-4" />
-          </div>
-          <div>
-            <h3 className="text-sm font-black uppercase tracking-[0.18em] text-neutral-900 dark:text-white">Premium layers coming next</h3>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">Promptuno stays focused on prompts while the product expands cleanly.</p>
+          <div className="mt-1 text-[12px] text-neutral-500 dark:text-neutral-400">
+            The extension is included in Free and Pro.
           </div>
         </div>
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {premiumLayers.map((layer) => (
-            <div key={layer.title} className="rounded-2xl border border-neutral-100 dark:border-white/10 bg-white/70 dark:bg-black/20 p-4">
-              <div className="text-[11px] font-black uppercase tracking-[0.16em] text-neutral-900 dark:text-white">{layer.title}</div>
-              <p className="text-[12px] leading-relaxed text-neutral-500 dark:text-neutral-400 mt-2">{layer.description}</p>
-            </div>
-          ))}
-        </div>
+        <a
+          href="https://github.com/promptuno/promptuno-app/tree/main/extension"
+          target="_blank"
+          rel="noreferrer"
+          className="text-[11px] font-bold text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors whitespace-nowrap"
+        >
+          Open extension
+        </a>
       </div>
     </div>
   );

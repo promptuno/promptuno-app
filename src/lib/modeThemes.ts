@@ -17,7 +17,7 @@ export const modeThemes: Record<
 > = {
   Prompt: {
     label: "Prompt",
-    description: "Clear, direct prompt generation",
+    description: "Prompt generator",
     accentText: "text-violet-500 dark:text-violet-400",
     accentBorder: "border-violet-500/20 dark:border-violet-400/20",
     accentSoft: "bg-violet-500/10 dark:bg-violet-400/10",
@@ -29,7 +29,7 @@ export const modeThemes: Record<
   },
   Image: {
     label: "Image",
-    description: "Cinematic image prompt direction",
+    description: "Image prompt",
     accentText: "text-amber-500 dark:text-amber-400",
     accentBorder: "border-amber-500/20 dark:border-amber-400/20",
     accentSoft: "bg-amber-500/10 dark:bg-amber-400/10",
@@ -41,7 +41,7 @@ export const modeThemes: Record<
   },
   Vibe: {
     label: "Vibe Code",
-    description: "Terminal-style build prompting",
+    description: "Coding prompt",
     accentText: "text-emerald-500 dark:text-emerald-400",
     accentBorder: "border-emerald-500/20 dark:border-emerald-400/20",
     accentSoft: "bg-emerald-500/10 dark:bg-emerald-400/10",

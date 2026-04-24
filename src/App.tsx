@@ -352,11 +352,11 @@ JSON structure:
       {/* Dynamic Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className={cn(
-          "absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] animate-pulse",
+          "absolute top-[-10%] left-[-10%] w-[28%] h-[28%] rounded-full blur-[110px] animate-pulse opacity-70",
           modeTheme.orbPrimary
         )}></div>
         <div className={cn(
-          "absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[120px] animate-pulse",
+          "absolute bottom-[-10%] right-[-10%] w-[28%] h-[28%] rounded-full blur-[110px] animate-pulse opacity-70",
           modeTheme.orbSecondary
         )} style={{ animationDelay: '2s' }}></div>
       </div>
@@ -375,7 +375,7 @@ JSON structure:
           </button>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-6">
+        <div className="flex items-center gap-2 md:gap-4">
           <div className={cn(
             "flex items-center gap-2 px-2.5 md:px-4 py-1.5 rounded-full border shadow-inner",
             "bg-neutral-50 dark:bg-neutral-900 border-neutral-200 dark:border-white/5"
@@ -390,14 +390,6 @@ JSON structure:
           <div className="hidden md:block">
             <LanguageSwitcher current={lang} onSelect={setLang} mode={mode} />
           </div>
-          <a
-            href="https://github.com/promptuno/promptuno-app/tree/main/extension"
-            target="_blank"
-            rel="noreferrer"
-            className="hidden lg:inline-flex px-3 py-2 rounded-full border text-[9px] font-black uppercase tracking-widest transition-all border-neutral-200 dark:border-white/10 text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
-          >
-            Use Promptuno in Chrome
-          </a>
           <button
             type="button"
             onClick={() => setView("pricing")}

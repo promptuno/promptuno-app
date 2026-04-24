@@ -38,7 +38,7 @@ const getModeIcon = (mode: AppMode) => {
 const AmbientVisuals: React.FC<{ mode: AppMode }> = ({ mode }) => {
   if (mode === "Image") {
     return (
-      <div className="pointer-events-none absolute inset-0 hidden overflow-hidden opacity-55 md:block">
+      <div className="pointer-events-none absolute inset-0 hidden overflow-hidden opacity-35 lg:block">
         {[
           "top-10 right-10 w-24 h-32 from-amber-300/28 via-pink-300/12 to-white/0",
           "bottom-12 left-10 w-28 h-20 from-orange-300/18 via-amber-300/10 to-white/0",
@@ -65,8 +65,8 @@ const AmbientVisuals: React.FC<{ mode: AppMode }> = ({ mode }) => {
 
   if (mode === "Vibe") {
     return (
-      <div className="pointer-events-none absolute inset-0 hidden overflow-hidden opacity-45 md:block">
-        <div className="absolute right-8 top-8 w-[58%] rounded-[28px] border border-emerald-400/15 bg-[#07120f]/85 shadow-[0_30px_120px_rgba(7,18,15,0.45)]">
+      <div className="pointer-events-none absolute inset-0 hidden overflow-hidden opacity-28 lg:block">
+        <div className="absolute right-8 top-8 w-[46%] rounded-[28px] border border-emerald-400/15 bg-[#07120f]/85 shadow-[0_30px_120px_rgba(7,18,15,0.45)]">
           <div className="flex items-center gap-2 px-4 py-3 border-b border-emerald-400/10">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-300/70" />
             <span className="w-2.5 h-2.5 rounded-full bg-cyan-300/60" />
@@ -87,18 +87,18 @@ const AmbientVisuals: React.FC<{ mode: AppMode }> = ({ mode }) => {
   }
 
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+    <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-65">
       <motion.div
         initial={false}
         animate={{ x: [0, 24, 0], y: [0, 8, 0] }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-8 right-10 h-36 w-36 rounded-full bg-violet-400/10 blur-3xl"
+        className="absolute top-10 right-10 h-28 w-28 rounded-full bg-violet-400/10 blur-3xl"
       />
       <motion.div
         initial={false}
         animate={{ x: [0, -18, 0], y: [0, -12, 0] }}
         transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-6 left-6 h-28 w-28 rounded-full bg-sky-400/10 blur-3xl"
+        className="absolute bottom-8 left-8 h-24 w-24 rounded-full bg-sky-400/10 blur-3xl"
       />
     </div>
   );
@@ -315,11 +315,11 @@ export const Composer: React.FC<ComposerProps> = ({
 
         <div className="flex flex-col gap-3 mb-5 md:mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <span className="text-[11px] md:text-[14px] font-black uppercase tracking-[0.16em] md:tracking-[0.2em] text-neutral-400 dark:text-neutral-600 text-center sm:text-left">
-              {theme.label} for
+            <span className="text-[11px] md:text-[13px] font-black uppercase tracking-[0.16em] md:tracking-[0.18em] text-neutral-400 dark:text-neutral-600 text-center sm:text-left">
+              {theme.description}
             </span>
             <span className="text-[10px] font-black uppercase tracking-[0.16em] text-neutral-400 dark:text-neutral-500 text-center sm:text-right">
-              {theme.description}
+              {platform}
             </span>
           </div>
 
