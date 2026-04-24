@@ -140,11 +140,6 @@ export const Composer: React.FC<ComposerProps> = ({
   }, [value]);
 
   useEffect(() => {
-    if (isMobileViewport && !isMobileComposerOpen) return;
-    textareaRef.current?.focus({ preventScroll: true });
-  }, [mode, platform, isMobileViewport, isMobileComposerOpen]);
-
-  useEffect(() => {
     const examples =
       mode === "Image"
         ? [
