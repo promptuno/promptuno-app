@@ -89,12 +89,45 @@ function looksLikeHtmlDocument(text: string) {
   return source.startsWith("<!doctype html") || source.startsWith("<html") || (source.includes("<body") && source.includes("</html>"));
 }
 
+function looksLikeProviderNotice(text: string) {
+  const source = text.trim().toLowerCase();
+  return source.includes("pollinations legacy text api is being deprecated") ||
+    source.includes("important notice") && source.includes("enter.pollinations.ai");
+}
+
 function cleanPromptText(text: string) {
   return text
     .replace(/^```(?:json|markdown|md|text)?/i, "")
     .replace(/```$/i, "")
     .replace(/^markdown\\?/i, "")
     .trim();
+}
+
+function extractProviderText(payload: any): string | null {
+  if (typeof payload === "string") {
+    return payload.trim() || null;
+  }
+
+  if (!payload || typeof payload !== "object") {
+    return null;
+  }
+
+  const candidates = [
+    payload?.text,
+    payload?.output,
+    payload?.response,
+    payload?.choices?.[0]?.message?.content,
+    payload?.choices?.[0]?.text,
+    payload?.data?.text,
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate === "string" && candidate.trim()) {
+      return candidate.trim();
+    }
+  }
+
+  return null;
 }
 
 function parseGeneratedPrompt(text: string, platform: Platform, lang: Language, mode: AppMode): GeneratedPrompt {
@@ -197,41 +230,193 @@ CRITICAL OUTPUT RULE: Return only one valid JSON object matching the requested s
     }
   }
 
-  const params = new URLSearchParams({
-    model: "openai",
-    json: "true",
-    private: "true",
-    temperature: "0.7",
-    system: strictSystemInstruction,
-  });
-  const publicResponse = await fetch(
-    `https://text.pollinations.ai/${encodeURIComponent(contents)}?${params.toString()}`,
-    { signal },
-  );
+  let lastPublicError = "The AI provider returned an empty response.";
 
-  const text = await publicResponse.text().catch(() => "");
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const publicResponse = await fetch("https://text.pollinations.ai/openai", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      signal,
+      body: JSON.stringify({
+        model: "openai",
+        messages: [
+          { role: "system", content: strictSystemInstruction },
+          { role: "user", content: contents },
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+      }),
+    });
 
-  if (looksLikeHtmlDocument(text)) {
-    throw new Error("The AI provider is temporarily unavailable. Please try again in a moment.");
+    const payload = await publicResponse.json().catch(() => null);
+    const text = extractProviderText(payload);
+
+    if (!publicResponse.ok) {
+      const providerMessage =
+        (payload && typeof payload === "object" && "error" in payload && typeof payload.error?.message === "string" && payload.error.message) ||
+        (payload && typeof payload === "object" && typeof payload.error === "string" && payload.error) ||
+        text;
+      lastPublicError =
+        publicResponse.status === 429
+          ? "The free public AI API is busy or rate-limited right now. Please wait a moment and try again."
+          : providerMessage || "Failed to generate prompt. Please try again.";
+      continue;
+    }
+
+    if (!text) {
+      lastPublicError = "The AI provider returned an empty response.";
+      continue;
+    }
+
+    if (looksLikeHtmlDocument(text) || looksLikeProviderNotice(text)) {
+      lastPublicError = "The AI provider returned a temporary service notice instead of a prompt.";
+      continue;
+    }
+
+    return { text };
   }
 
-  if (!publicResponse.ok) {
-    const message =
-      publicResponse.status === 429
-        ? "The free public AI API is busy or rate-limited right now. Please wait a moment and try again."
-        : text || "Failed to generate prompt. Please try again.";
-    throw new Error(message);
-  }
-
-  if (!text.trim()) {
-    throw new Error("The AI provider returned an empty response.");
-  }
-
-  return { text };
+  throw new Error(`${lastPublicError} Please try again.`);
 }
 
 function buildRefineQuestions(input: string, mode: AppMode, platform: Platform) {
   return [];
+}
+
+function buildLocalGeneratedPrompt(input: string, platform: Platform, lang: Language, mode: AppMode, providerIssue?: string): GeneratedPrompt {
+  const normalizedInput = input.trim();
+  const componentIntegrationHint = /(shadcn|tailwind|typescript|react|component|ui|textarea|button|dashboard|landing page)/i.test(normalizedInput);
+  const providerNote = providerIssue ? `\n\n> Promptuno generated this locally because the live AI provider was unavailable: ${providerIssue}` : "";
+
+  if (mode === "Image") {
+    return {
+      isNonsense: false,
+      goal: `Image prompt strategy for ${platform}`,
+      engineeredPrompt: `### Role
+You are an expert visual prompt designer.
+
+### Objective
+Turn this concept into a polished image-generation prompt for ${platform}:
+> ${normalizedInput}
+
+### Output Requirements
+- Clarify the main subject and setting.
+- Define composition, camera angle, framing, lens feel, and depth.
+- Specify lighting, mood, palette, materials, and texture.
+- Include style references only as visual language, not direct copyrighted imitation.
+- Add useful negative constraints to avoid muddy output or irrelevant details.
+
+### Final Response Format
+1. **Prompt**
+2. **Negative Prompt**
+3. **Optional Variants**
+
+### Quality Bar
+- Cinematic, specific, visually grounded
+- No filler adjectives
+- Every phrase should change the image in a meaningful way${providerNote}`,
+      explanation: "Promptuno used a local image-prompt scaffold so you still get a production-ready visual brief even when the provider is unstable.",
+    };
+  }
+
+  if (mode === "Vibe") {
+    return {
+      isNonsense: false,
+      goal: `Vibe coding prompt strategy for ${platform}`,
+      engineeredPrompt: `### Role
+You are a senior product engineer shipping a polished feature in a React codebase.
+
+### User Request
+> ${normalizedInput}
+
+### Working Assumptions
+- The app should support **React**, **Tailwind CSS**, and **TypeScript**.
+- Reusable primitives should live in **/components/ui** when the project uses shadcn-style structure.
+- If shadcn is not set up, explain the required setup first, then continue implementation.
+
+### Required Workflow
+1. Audit whether the codebase already supports:
+   - shadcn/ui structure
+   - Tailwind CSS
+   - TypeScript
+2. Identify the default paths for:
+   - components
+   - global styles
+3. If \`/components/ui\` does not exist, explain why it should be created before adding shared UI primitives.
+4. Add or adapt the requested component(s) using the existing project conventions.
+5. Install any missing dependencies with exact commands.
+6. Wire the component into the best demo or page entry point.
+7. Verify responsive behavior, states, and text fit.
+
+### Implementation Requirements
+- Prefer existing project patterns over inventing new abstractions.
+- Use lucide-react for icons when appropriate.
+- Keep styling moonlit, glassy, and premium if the request implies that direction.
+- When integrating shared UI, include:
+  - install commands
+  - exact file paths
+  - dependency notes
+  - state/prop expectations
+  - responsive behavior checks
+- If the user supplied design references, visibly carry those cues into the implementation rather than only matching function.
+
+### Output Format
+#### Stack Audit
+- Summarize current support for React, Tailwind, TypeScript, and shadcn/ui
+
+#### File Plan
+- List exact files to create or update
+
+#### Commands
+\`\`\`bash
+# install missing dependencies here
+\`\`\`
+
+#### Implementation
+- Provide the code changes with clear directory targets
+
+#### Verification
+- Explain how to confirm the component renders and behaves correctly
+
+### Extra Focus
+${componentIntegrationHint
+  ? "- Treat this as a real component-integration task: dependency audit, component paths, setup notes, and copy-paste-ready code matter more than generic advice."
+  : "- Turn the feature idea into a concrete build brief with deliverables, constraints, and acceptance criteria."}${providerNote}`,
+      explanation: "Promptuno assembled a local vibe-coding template that preserves the engineering structure you asked for: stack audit, file placement, install commands, implementation steps, and visible design carry-through.",
+    };
+  }
+
+  return {
+    isNonsense: false,
+    goal: `${mode} prompt strategy for ${platform}`,
+    engineeredPrompt: `### Role
+You are an expert prompt engineer writing for ${platform}.
+
+### User Objective
+> ${normalizedInput}
+
+### Instructions
+- Rewrite the user's request into a stronger, clearer, more actionable prompt.
+- Preserve intent while adding missing context, structure, constraints, and success criteria.
+- Ask the model to reason in an organized way without adding fluff.
+- Prefer concrete deliverables over vague recommendations.
+
+### Output Shape
+1. **Goal**
+2. **Context**
+3. **Instructions**
+4. **Constraints**
+5. **Expected Output**
+
+### Quality Bar
+- Specific
+- Practical
+- Easy to paste directly into ${platform}
+- Strong enough for professional use${providerNote}`,
+    explanation: "Promptuno used a local prompt-architecture fallback so the app still returns something clean and usable even when the external model path is unreliable.",
+  };
 }
 
 export default function App() {
@@ -412,9 +597,19 @@ JSON structure:
         return;
       }
       console.error("Generation error:", err);
-      setError(err.message || "Failed to generate prompt. Please try again.");
+      const fallbackResponse = buildLocalGeneratedPrompt(
+        inputToUse,
+        platform,
+        lang,
+        mode,
+        err?.message || "Provider unavailable",
+      );
+
+      setError(null);
       setIsGenerating(false);
       setIsAnalyzing(false);
+      setCurrentResponse(fallbackResponse);
+      increment();
       abortControllerRef.current = null;
     }
   };

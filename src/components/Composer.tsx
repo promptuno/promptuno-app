@@ -54,6 +54,17 @@ function getVibePreviewLines(platform: Platform, seedText: string) {
   ];
 }
 
+const vibeQuickActions = [
+  "Generate Code",
+  "Launch App",
+  "UI Components",
+  "Theme Ideas",
+  "Dashboard Build",
+  "Landing Page",
+  "Upload Docs",
+  "Image Assets",
+] as const;
+
 const AmbientVisuals: React.FC<{ mode: AppMode; platform: Platform; seedText: string }> = ({ mode, platform, seedText }) => {
   if (mode === "Image") {
     return (
@@ -285,6 +296,19 @@ export const Composer: React.FC<ComposerProps> = ({
         <div className={cn("absolute -top-16 -right-10 w-40 h-40 rounded-full blur-3xl", theme.orbPrimary)} />
         <div className={cn("absolute -bottom-16 -left-10 w-40 h-40 rounded-full blur-3xl", theme.orbSecondary)} />
         <AmbientVisuals mode={mode} platform={platform} seedText={value} />
+        {mode === "Vibe" && (
+          <div className="relative z-10 mb-6 md:mb-8 text-center">
+            <div className="text-[11px] font-black uppercase tracking-[0.24em] text-emerald-700/65 dark:text-emerald-300/65">
+              Promptuno Vibe
+            </div>
+            <h2 className="mt-3 text-3xl md:text-4xl font-semibold text-neutral-950 dark:text-white">
+              Build something polished.
+            </h2>
+            <p className="mt-2 text-sm md:text-base text-neutral-500 dark:text-neutral-400">
+              Drop in the component, stack, prompt rules, and the design language you want carried through.
+            </p>
+          </div>
+        )}
         {isLimitReached && !isLimitDismissed && (
           <div className="absolute inset-0 z-50 backdrop-blur-xl bg-white/20 dark:bg-black/20 flex flex-col items-center justify-center p-5 text-center animate-in fade-in duration-500">
             <div className="bg-white dark:bg-neutral-900 p-6 md:p-8 rounded-[28px] md:rounded-[32px] shadow-2xl border border-neutral-100 dark:border-white/10 max-w-sm">
@@ -446,6 +470,23 @@ export const Composer: React.FC<ComposerProps> = ({
               >
                 {line}
               </div>
+            ))}
+          </div>
+        )}
+
+        {mode === "Vibe" && !value.trim() && (
+          <div className="mt-6 flex items-center justify-center flex-wrap gap-3">
+            {vibeQuickActions.map((label) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() =>
+                  onChange(`Create a ${platform} vibe-coding prompt for ${label.toLowerCase()} using React, Tailwind, TypeScript, shadcn/ui, responsive behavior, and implementation steps.`)
+                }
+                className="rounded-full border border-neutral-200/70 dark:border-white/10 bg-black/5 dark:bg-white/[0.04] px-3.5 py-2 text-[11px] font-semibold text-neutral-600 dark:text-neutral-300 transition-all hover:bg-black/10 hover:text-neutral-900 dark:hover:bg-white/[0.08] dark:hover:text-white"
+              >
+                {label}
+              </button>
             ))}
           </div>
         )}

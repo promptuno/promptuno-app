@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Check, ChevronRight, Copy, RotateCcw, Scissors, Sparkles, Zap } from "lucide-react";
 import { AppMode, GeneratedPrompt, Language, Platform, RefinementType } from "../types";
 import { cn } from "../lib/utils";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { Typewriter } from "./Typewriter";
 import { translations } from "../lib/translations";
 import { modeThemes } from "../lib/modeThemes";
@@ -29,7 +29,6 @@ export const PromptResponse: React.FC<PromptResponseProps> = ({
   const t = translations[lang];
   const theme = modeThemes[mode];
   const [copied, setCopied] = useState(false);
-  const [isTypingComplete, setIsTypingComplete] = useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(response.engineeredPrompt);
@@ -106,69 +105,69 @@ export const PromptResponse: React.FC<PromptResponseProps> = ({
                 {goalLabel}
               </span>
               <p className="mb-8 opacity-80 leading-relaxed">
-                <Typewriter text={response.goal} speed={15} />
+                <Typewriter text={response.goal} speed={12} />
               </p>
 
               <span className={cn("font-black text-[11px] uppercase tracking-widest block mb-3 border-b pb-1 w-fit", theme.accentText, theme.accentBorder)}>
                 {outputLabel}
               </span>
-              <div className="whitespace-pre-wrap leading-relaxed selection:bg-white/20">
-                <Typewriter
-                  text={response.engineeredPrompt}
-                  speed={8}
-                  delay={1000}
-                  onComplete={() => setIsTypingComplete(true)}
-                />
+              <div className="whitespace-pre-wrap leading-relaxed selection:bg-white/20 rounded-2xl border border-white/10 bg-black/[0.04] dark:bg-black/30 px-4 py-4 md:px-5 md:py-5 shadow-inner">
+                <div className="mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-neutral-400 dark:text-neutral-500">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400/80" />
+                  <span className="h-2 w-2 rounded-full bg-cyan-400/70" />
+                  <span className="h-2 w-2 rounded-full bg-blue-400/70" />
+                  <span className="ml-1">{mode === "Vibe" ? "Live Build Prompt" : "Ready to Copy"}</span>
+                </div>
+                <pre className={cn(
+                  "whitespace-pre-wrap break-words text-[13px] md:text-[14px] leading-7 font-medium m-0",
+                  mode === "Vibe" ? "font-mono text-emerald-950 dark:text-emerald-100" : "text-neutral-800 dark:text-neutral-100"
+                )}>
+                  {response.engineeredPrompt}
+                </pre>
               </div>
             </div>
 
-            <AnimatePresence>
-              {isTypingComplete && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={cn("p-5 rounded-2xl border transition-all hover:bg-white/[0.07]", theme.accentSoft, theme.accentBorder)}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <Zap className={cn("w-3.5 h-3.5", theme.accentText)} />
-                    <span className={cn("text-[10px] font-black uppercase tracking-[0.2em] block", theme.accentText)}>
-                      {reasoningLabel}
-                    </span>
-                  </div>
-                  <p className="text-[13px] leading-relaxed italic font-medium text-neutral-500 dark:text-neutral-400">
-                    <Typewriter text={response.explanation} speed={5} delay={500} />
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.08 }}
+              className={cn("p-5 rounded-2xl border transition-all hover:bg-white/[0.07]", theme.accentSoft, theme.accentBorder)}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Zap className={cn("w-3.5 h-3.5", theme.accentText)} />
+                <span className={cn("text-[10px] font-black uppercase tracking-[0.2em] block", theme.accentText)}>
+                  {reasoningLabel}
+                </span>
+              </div>
+              <p className="text-[13px] leading-relaxed italic font-medium text-neutral-500 dark:text-neutral-400">
+                <Typewriter text={response.explanation} speed={5} delay={250} />
+              </p>
+            </motion.div>
 
-            <AnimatePresence>
-              {isTypingComplete && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex flex-wrap gap-3 pt-4"
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.12 }}
+              className="flex flex-wrap gap-3 pt-4"
+            >
+              <button
+                onClick={onRegenerate}
+                className={cn("group px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-[0.15em] transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-xl text-white", theme.accentGradient, theme.accentGlow)}
+              >
+                <RotateCcw className="w-4 h-4 transition-transform group-hover:rotate-180 duration-500" />
+                {t.refinements.Reforge}
+              </button>
+              {refinementActions.map((action) => (
+                <button
+                  key={action.type}
+                  onClick={() => onRefine(action.type)}
+                  className="group px-4 md:px-5 py-3 border rounded-xl text-[11px] md:text-[12px] font-black uppercase tracking-[0.12em] md:tracking-[0.15em] transition-all flex items-center gap-2 shadow-sm bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-white/10 hover:border-black dark:hover:border-white"
                 >
-                  <button
-                    onClick={onRegenerate}
-                    className={cn("group px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-[0.15em] transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-xl text-white", theme.accentGradient, theme.accentGlow)}
-                  >
-                    <RotateCcw className="w-4 h-4 transition-transform group-hover:rotate-180 duration-500" />
-                    {t.refinements.Reforge}
-                  </button>
-                  {refinementActions.map((action) => (
-                    <button
-                      key={action.type}
-                      onClick={() => onRefine(action.type)}
-                      className="group px-4 md:px-5 py-3 border rounded-xl text-[11px] md:text-[12px] font-black uppercase tracking-[0.12em] md:tracking-[0.15em] transition-all flex items-center gap-2 shadow-sm bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-white/10 hover:border-black dark:hover:border-white"
-                    >
-                      {action.icon}
-                      {action.label}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  {action.icon}
+                  {action.label}
+                </button>
+              ))}
+            </motion.div>
           </div>
         </div>
       </div>
