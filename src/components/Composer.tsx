@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUp, Image as ImageIcon, Mic, MicOff, Rocket, Sparkles, TerminalSquare, X } from "lucide-react";
 import { cn } from "../lib/utils";
 import { AppMode, Platform } from "../types";
@@ -22,6 +22,7 @@ interface ComposerProps {
   usageRemaining?: number;
   usageLimit?: number;
   onUpgrade?: () => void;
+  onCancel?: () => void;
   lang: Language;
   isMobileViewport?: boolean;
   isMobileComposerOpen?: boolean;
@@ -35,7 +36,25 @@ const getModeIcon = (mode: AppMode) => {
   return <Sparkles className="w-6 h-6" />;
 };
 
-const AmbientVisuals: React.FC<{ mode: AppMode }> = ({ mode }) => {
+function getVibePreviewLines(platform: Platform, seedText: string) {
+  if (/(shadcn|textarea|button|tailwind|typescript|component|react)/i.test(seedText)) {
+    return [
+      "$ audit-stack --react --tailwind --typescript",
+      "$ npx shadcn@latest add textarea button",
+      "$ npm i lucide-react @radix-ui/react-slot class-variance-authority",
+      `$ wire-ui --target ${platform.toLowerCase()} --components /components/ui`,
+    ];
+  }
+
+  return [
+    "$ define-stack --intent ship something polished",
+    "$ add-constraints --responsive --fast --clean",
+    "$ map-deliverables --ui --logic --edge-cases",
+    `$ shape-prompt --platform ${platform.toLowerCase()}`,
+  ];
+}
+
+const AmbientVisuals: React.FC<{ mode: AppMode; platform: Platform; seedText: string }> = ({ mode, platform, seedText }) => {
   if (mode === "Image") {
     return (
       <div className="pointer-events-none absolute inset-0 hidden overflow-hidden opacity-35 lg:block">
@@ -64,24 +83,26 @@ const AmbientVisuals: React.FC<{ mode: AppMode }> = ({ mode }) => {
   }
 
   if (mode === "Vibe") {
+    const lines = getVibePreviewLines(platform, seedText);
     return (
-      <div className="pointer-events-none absolute inset-0 hidden overflow-hidden opacity-28 lg:block">
-        <div className="absolute right-8 top-8 w-[46%] rounded-[28px] border border-emerald-400/15 bg-[#07120f]/85 shadow-[0_30px_120px_rgba(7,18,15,0.45)]">
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-emerald-400/10">
+      <div className="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block">
+        <div className="absolute right-8 top-28 w-[34%] max-w-[260px] rounded-[24px] border border-emerald-400/12 bg-white/25 dark:bg-[#07120f]/42 backdrop-blur-2xl shadow-[0_18px_55px_rgba(7,18,15,0.14)] opacity-70">
+          <div className="flex items-center gap-2 px-3.5 py-2.5 border-b border-emerald-400/10">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-300/70" />
             <span className="w-2.5 h-2.5 rounded-full bg-cyan-300/60" />
             <span className="w-2.5 h-2.5 rounded-full bg-blue-300/60" />
-            <span className="ml-3 text-[9px] font-black uppercase tracking-[0.22em] text-emerald-200/55">
+            <span className="ml-2 text-[8px] font-black uppercase tracking-[0.22em] text-emerald-700/55 dark:text-emerald-200/55">
               vibe-code.prompt
             </span>
           </div>
-          <div className="px-4 py-4 space-y-2 text-[10px] font-semibold text-emerald-200/65">
-            <div>$ define-stack --intent "ship a premium frontend"</div>
-            <div>$ add-constraints --responsive --fast --polished</div>
-            <div>$ shape-prompt --platform "AI model"</div>
+          <div className="px-4 py-3 space-y-1.5 font-mono text-[9px] leading-relaxed text-emerald-800/55 dark:text-emerald-200/48">
+            {lines.map((line) => (
+              <div key={line}>{line}</div>
+            ))}
           </div>
         </div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(52,211,153,0.06)_1px,transparent_1px)] bg-[length:100%_24px]" />
+        <div className="absolute inset-x-8 bottom-24 h-px bg-gradient-to-r from-transparent via-emerald-400/18 to-transparent" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(52,211,153,0.035)_1px,transparent_1px)] bg-[length:100%_22px] opacity-50" />
       </div>
     );
   }
@@ -117,6 +138,7 @@ export const Composer: React.FC<ComposerProps> = ({
   usageRemaining = 0,
   usageLimit = 5,
   onUpgrade,
+  onCancel,
   lang,
   isMobileViewport = false,
   isMobileComposerOpen = true,
@@ -131,6 +153,7 @@ export const Composer: React.FC<ComposerProps> = ({
   const [placeholderText, setPlaceholderText] = useState("");
   const recognitionRef = useRef<any>(null);
   const usagePercent = Math.max(0, Math.min(100, (usageRemaining / usageLimit) * 100));
+  const vibePreviewLines = useMemo(() => getVibePreviewLines(platform, value), [platform, value]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -261,7 +284,7 @@ export const Composer: React.FC<ComposerProps> = ({
         <div className={cn("absolute inset-x-0 top-0 h-1 opacity-90", theme.accentGradient)} />
         <div className={cn("absolute -top-16 -right-10 w-40 h-40 rounded-full blur-3xl", theme.orbPrimary)} />
         <div className={cn("absolute -bottom-16 -left-10 w-40 h-40 rounded-full blur-3xl", theme.orbSecondary)} />
-        <AmbientVisuals mode={mode} />
+        <AmbientVisuals mode={mode} platform={platform} seedText={value} />
         {isLimitReached && !isLimitDismissed && (
           <div className="absolute inset-0 z-50 backdrop-blur-xl bg-white/20 dark:bg-black/20 flex flex-col items-center justify-center p-5 text-center animate-in fade-in duration-500">
             <div className="bg-white dark:bg-neutral-900 p-6 md:p-8 rounded-[28px] md:rounded-[32px] shadow-2xl border border-neutral-100 dark:border-white/10 max-w-sm">
@@ -320,10 +343,12 @@ export const Composer: React.FC<ComposerProps> = ({
 
           <div className="relative grid grid-cols-4 gap-1 p-1.5 rounded-[20px] border bg-white/35 dark:bg-white/5 border-neutral-200/60 dark:border-white/5 backdrop-blur-2xl shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] dark:shadow-none">
             {PLATFORMS.map((p) => (
-              <button
+              <motion.button
                 key={p}
                 type="button"
                 onClick={() => onPlatformChange(p)}
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.985 }}
                 className={cn(
                   "relative min-w-0 px-2 sm:px-4 py-2.5 text-[10px] sm:text-[11px] font-bold rounded-[16px] transition-all duration-500 overflow-hidden",
                   platform === p
@@ -336,17 +361,17 @@ export const Composer: React.FC<ComposerProps> = ({
                     <motion.div
                       layoutId="platform-pill"
                       className={cn("absolute inset-0 shadow-sm rounded-[16px] -z-0 border bg-white/95 dark:bg-neutral-900/95", theme.accentBorder)}
-                      transition={{ type: "spring", bounce: 0.18, duration: 0.7 }}
+                      transition={{ type: "spring", bounce: 0.2, stiffness: 280, damping: 24 }}
                     />
                     <motion.div
                       layoutId="platform-sheen"
                       className="absolute inset-x-3 top-1 h-5 rounded-full bg-white/50 dark:bg-white/[0.05] blur-xl -z-0"
-                      transition={{ type: "spring", bounce: 0.16, duration: 0.66 }}
+                      transition={{ type: "spring", bounce: 0.18, stiffness: 260, damping: 24 }}
                     />
                   </>
                 )}
                 <span className="relative z-10 truncate block">{p}</span>
-              </button>
+              </motion.button>
             ))}
           </div>
 
@@ -412,6 +437,19 @@ export const Composer: React.FC<ComposerProps> = ({
           </div>
         )}
 
+        {mode === "Vibe" && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {vibePreviewLines.slice(0, 3).map((line) => (
+              <div
+                key={line}
+                className="rounded-full border border-emerald-500/14 bg-emerald-500/[0.06] px-3 py-1.5 font-mono text-[10px] font-semibold text-emerald-700/75 dark:text-emerald-300/70"
+              >
+                {line}
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className={cn("mt-5 rounded-2xl border p-3 flex items-center justify-between gap-3 bg-neutral-50/70 dark:bg-white/[0.03]", theme.accentBorder)}>
           <div>
             <div className="text-[10px] font-black uppercase tracking-[0.18em] text-neutral-400 dark:text-neutral-500">
@@ -447,51 +485,65 @@ export const Composer: React.FC<ComposerProps> = ({
             </button>
           </div>
 
-          <button
-            type="submit"
-            disabled={disabled || !value.trim() || isLimitReached}
-            className={cn(
-              "group relative w-full sm:w-auto px-8 py-4 rounded-[20px] md:rounded-[24px] text-[13px] md:text-[15px] font-black uppercase tracking-[0.12em] md:tracking-[0.15em] transition-all duration-500 overflow-hidden shadow-2xl flex items-center justify-center order-2 sm:order-3",
-              value.trim() && !disabled && !isLimitReached
-                ? cn("text-white hover:-translate-y-1 active:translate-y-0", theme.accentGradient, theme.accentGlow)
-                : "bg-neutral-100 text-neutral-300 dark:bg-neutral-900 dark:text-neutral-800 cursor-not-allowed"
+          <div className="order-2 sm:order-3 flex w-full sm:w-auto items-center gap-3">
+            {isGenerating && onCancel && (
+              <button
+                type="button"
+                onClick={onCancel}
+                className="px-4 py-3 rounded-[18px] border border-neutral-200 dark:border-white/10 bg-white/70 dark:bg-white/[0.04] text-[11px] font-black uppercase tracking-[0.14em] text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-all"
+              >
+                Stop
+              </button>
             )}
-          >
-            <span className="relative z-10 flex items-center gap-3">
-              {isGenerating ? t.labels.Forging : t.buttons.Generate}
-              <div className="relative w-5 h-5 flex items-center justify-center">
-                <AnimatePresence mode="wait">
-                  {isGenerating ? (
-                    <motion.div
-                      key="rocket"
-                      initial={{ y: 20, opacity: 0, scale: 0.5 }}
-                      animate={{ y: -40, opacity: [0, 1, 0], scale: [0.5, 1, 0.8] }}
-                      transition={{ duration: 0.8, ease: "easeIn", repeat: Infinity }}
-                    >
-                      <Rocket className="w-5 h-5 text-white dark:text-black" />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="arrow"
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -20, opacity: 0 }}
-                    >
-                      <ArrowUp className={cn("w-5 h-5 transition-transform", !disabled && "group-hover:-translate-y-1")} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </span>
-            {isGenerating && (
-              <motion.div
-                className="absolute inset-0 bg-black/5 dark:bg-white/5"
-                initial={{ x: "-100%" }}
-                animate={{ x: "100%" }}
-                transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-              />
-            )}
-          </button>
+            <motion.button
+              type="submit"
+              whileHover={value.trim() && !disabled && !isLimitReached ? { y: -2, scale: 1.01 } : undefined}
+              whileTap={value.trim() && !disabled && !isLimitReached ? { scale: 0.98 } : undefined}
+              disabled={disabled || !value.trim() || isLimitReached}
+              className={cn(
+                "group relative w-full sm:w-auto px-8 py-4 rounded-[20px] md:rounded-[24px] text-[13px] md:text-[15px] font-black uppercase tracking-[0.12em] md:tracking-[0.15em] transition-all duration-500 overflow-hidden shadow-2xl flex items-center justify-center",
+                value.trim() && !disabled && !isLimitReached
+                  ? cn("text-white", theme.accentGradient, theme.accentGlow)
+                  : "bg-neutral-100 text-neutral-300 dark:bg-neutral-900 dark:text-neutral-800 cursor-not-allowed"
+              )}
+            >
+              <span className="absolute inset-[1px] rounded-[19px] bg-white/[0.08] dark:bg-white/[0.04]" />
+              <span className="relative z-10 flex items-center gap-3">
+                {isGenerating ? t.labels.Forging : t.buttons.Generate}
+                <div className="relative w-5 h-5 flex items-center justify-center">
+                  <AnimatePresence mode="wait">
+                    {isGenerating ? (
+                      <motion.div
+                        key="rocket"
+                        initial={{ y: 20, opacity: 0, scale: 0.5 }}
+                        animate={{ y: -40, opacity: [0, 1, 0], scale: [0.5, 1, 0.8] }}
+                        transition={{ duration: 0.8, ease: "easeIn", repeat: Infinity }}
+                      >
+                        <Rocket className="w-5 h-5 text-white dark:text-black" />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="arrow"
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -20, opacity: 0 }}
+                      >
+                        <ArrowUp className="w-5 h-5 transition-transform group-hover:-translate-y-1" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </span>
+              {isGenerating && (
+                <motion.div
+                  className="absolute inset-0 bg-black/5 dark:bg-white/5"
+                  initial={{ x: "-100%" }}
+                  animate={{ x: "100%" }}
+                  transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                />
+              )}
+            </motion.button>
+          </div>
         </div>
       </div>
     </form>

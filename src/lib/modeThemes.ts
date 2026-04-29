@@ -41,7 +41,7 @@ export const modeThemes: Record<
   },
   Vibe: {
     label: "Vibe Code",
-    description: "Coding prompt",
+    description: "CMD-style coding prompt",
     accentText: "text-emerald-500 dark:text-emerald-400",
     accentBorder: "border-emerald-500/20 dark:border-emerald-400/20",
     accentSoft: "bg-emerald-500/10 dark:bg-emerald-400/10",

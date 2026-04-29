@@ -11,6 +11,7 @@ interface AnalysisLoaderProps {
   mode?: AppMode;
   lang: Language;
   request?: string;
+  onCancel?: () => void;
 }
 
 const FlowingText = ({ text, delay = 0 }: { text: string; delay?: number }) => {
@@ -37,22 +38,52 @@ const FlowingText = ({ text, delay = 0 }: { text: string; delay?: number }) => {
   );
 };
 
+const keywordCorrections: Record<string, string> = {
+  promot: "prompt",
+  propt: "prompt",
+  prolpt: "prompt",
+  promt: "prompt",
+  chatgt: "chatgpt",
+  claud: "claude",
+  gemni: "gemini",
+  organizse: "organize",
+  organisee: "organize",
+  documemts: "documents",
+  documnts: "documents",
+  vibecode: "vibe code",
+};
+
+function cleanKeyword(word: string) {
+  const normalized = keywordCorrections[word] || word;
+  return normalized.replace(/^-+|-+$/g, "");
+}
+
+function formatKeyword(word: string) {
+  return word
+    .split(" ")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 function getKeywords(request: string) {
   const stopWords = new Set([
     "the", "and", "for", "with", "that", "this", "from", "into", "make", "create", "write", "please", "prompt", "want",
     "une", "des", "les", "pour", "avec", "dans", "sur", "mon", "mes", "faire",
   ]);
 
-  return request
+  return [...new Set(
+    request
     .toLowerCase()
     .replace(/[^a-z0-9\u00c0-\u024f\u0600-\u06ff\s-]/gi, " ")
     .split(/\s+/)
-    .map((word) => word.trim())
+    .map((word) => cleanKeyword(word.trim()))
     .filter((word) => word.length > 3 && !stopWords.has(word))
+  )]
+    .map(formatKeyword)
     .slice(0, 5);
 }
 
-export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode = "Prompt", lang, request = "" }) => {
+export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode = "Prompt", lang, request = "", onCancel }) => {
   const t = translations[lang];
   const [currentStep, setCurrentStep] = useState(0);
   const keywords = getKeywords(request);
@@ -216,6 +247,15 @@ export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({ platform, mode =
           >
             {currentStep >= steps.length - 1 ? "Almost ready" : t.labels.Forging}
           </motion.div>
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-4 py-2 rounded-full border border-neutral-200 dark:border-white/10 bg-white/60 dark:bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
+            >
+              Stop
+            </button>
+          )}
         </div>
       </div>
     </div>

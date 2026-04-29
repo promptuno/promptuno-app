@@ -45,10 +45,12 @@ export const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ mode, onChange }) =>
           const theme = modeThemes[item.id];
 
           return (
-            <button
+            <motion.button
               key={item.id}
               type="button"
               onClick={() => onChange(item.id)}
+              whileHover={{ y: -1, scale: 1.01 }}
+              whileTap={{ scale: 0.985 }}
               className={cn(
                 "group relative min-h-[56px] px-2.5 sm:px-4 py-2.5 rounded-[18px] text-left transition-all duration-500 overflow-hidden border",
                 isActive
@@ -60,20 +62,21 @@ export const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ mode, onChange }) =>
                 <motion.div
                   layoutId="mode-pill"
                   className={cn("absolute inset-0 rounded-[18px] shadow-lg", theme.accentGradient, theme.accentGlow)}
-                  transition={{ type: "spring", bounce: 0.18, duration: 0.7 }}
+                  transition={{ type: "spring", bounce: 0.22, stiffness: 280, damping: 24 }}
                 />
               )}
               {isActive && (
                 <motion.div
                   layoutId="mode-glass"
-                  className="absolute inset-[1px] rounded-[17px] bg-white/12 dark:bg-white/[0.08]"
-                  transition={{ type: "spring", bounce: 0.16, duration: 0.66 }}
+                  className="absolute inset-[1px] rounded-[17px] bg-white/16 dark:bg-white/[0.08]"
+                  transition={{ type: "spring", bounce: 0.18, stiffness: 260, damping: 24 }}
                 />
               )}
               {!isActive && (
                 <div className={cn("absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-300 group-hover:opacity-100", theme.accentGradient)} />
               )}
               <div className="absolute inset-x-4 top-0 h-8 rounded-full bg-white/20 dark:bg-white/[0.08] blur-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+              <div className="absolute inset-x-5 top-1 h-5 rounded-full bg-white/20 dark:bg-white/[0.06] blur-xl opacity-50" />
               <span className="relative z-10 flex items-center gap-2.5">
                 <span className={cn(
                   "w-8 h-8 rounded-2xl border flex items-center justify-center transition-colors",
@@ -89,7 +92,7 @@ export const ModeSwitcher: React.FC<ModeSwitcherProps> = ({ mode, onChange }) =>
                   </span>
                 </span>
               </span>
-            </button>
+            </motion.button>
           );
         })}
       </div>

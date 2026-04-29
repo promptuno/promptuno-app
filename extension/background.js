@@ -12,30 +12,6 @@ const MODEL_GUIDANCE = {
   Copilot: "documents, meetings, email, and enterprise work"
 };
 
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({
-    id: "promptuno-improve-selection",
-    title: "Open Promptuno for selected text",
-    contexts: ["selection", "editable"]
-  });
-});
-
-chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (!tab?.id) return;
-  chrome.tabs.sendMessage(tab.id, {
-    type: "PROMPTUNO_CONTEXT_IMPROVE",
-    text: info.selectionText || ""
-  });
-});
-
-chrome.commands.onCommand.addListener((command) => {
-  if (command !== "promptuno-improve-selection") return;
-  chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-    if (!tab?.id) return;
-    chrome.tabs.sendMessage(tab.id, { type: "PROMPTUNO_CONTEXT_IMPROVE", text: "" });
-  });
-});
-
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   (async () => {
     if (message.type === "PROMPTUNO_USAGE") {
@@ -156,6 +132,9 @@ async function generateWithPromptuno({ action = "prompt", input = "", platform =
 
   const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(payload)}?${params.toString()}`);
   const text = await response.text();
+  if (looksLikeHtmlDocument(text)) {
+    throw new Error("The AI provider is temporarily unavailable. Please try again in a moment.");
+  }
   if (!response.ok) {
     throw new Error(response.status === 429 ? "The free AI provider is busy. Try again in a moment." : "Promptuno could not generate right now.");
   }
@@ -169,11 +148,16 @@ async function generateWithPromptuno({ action = "prompt", input = "", platform =
 
 function parseOutput(text) {
   const source = text.trim();
+  if (looksLikeHtmlDocument(source)) {
+    return { output: "", note: "The AI provider is temporarily unavailable. Please try again in a moment." };
+  }
   const fenced = source.match(/```(?:json)?\s*([\s\S]*?)```/i);
   const candidate = fenced?.[1]?.trim() || source;
 
   try {
-    return JSON.parse(candidate);
+    let parsed = JSON.parse(candidate);
+    if (typeof parsed === "string") parsed = JSON.parse(parsed);
+    return parsed;
   } catch {
     const start = candidate.indexOf("{");
     const end = candidate.lastIndexOf("}");
@@ -186,4 +170,9 @@ function parseOutput(text) {
     }
     return { output: source.replace(/^markdown\\?/i, "").trim() };
   }
+}
+
+function looksLikeHtmlDocument(text) {
+  const source = String(text).trim().toLowerCase();
+  return source.startsWith("<!doctype html") || source.startsWith("<html") || (source.includes("<body") && source.includes("</html>"));
 }

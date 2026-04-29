@@ -9,7 +9,7 @@ const englishCopy = {
   placeholders: {
     Prompt: "Describe what you want the AI to do. Promptuno will engineer a clean, strong prompt for {platform}...",
     Image: "Describe the subject, style, mood, composition, and details you want in the final image prompt...",
-    Vibe: "Describe the feature, product idea, stack, style, and constraints you want in a terminal-clean vibe coding prompt...",
+    Vibe: "Describe the feature, component, stack, style, constraints, and implementation notes you want in a terminal-clean vibe coding prompt...",
   },
   buttons: {
     Generate: "Generate Prompt",

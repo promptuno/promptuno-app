@@ -1,19 +1,10 @@
 let activeField = null;
-let inlineButton = null;
 let panel = null;
 
 document.addEventListener("focusin", (event) => {
   const target = event.target;
   if (!isEditable(target)) return;
   activeField = target;
-  showInlineButton(target);
-});
-
-document.addEventListener("selectionchange", () => {
-  const selection = window.getSelection()?.toString().trim();
-  if (selection && selection.length > 8) {
-    showInlineButtonForSelection();
-  }
 });
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
@@ -33,35 +24,6 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     sendResponse({ ok: true });
   }
 });
-
-function showInlineButton(target) {
-  removeInlineButton();
-  const rect = target.getBoundingClientRect();
-  inlineButton = document.createElement("button");
-  inlineButton.className = "promptuno-inline-button";
-  inlineButton.type = "button";
-  inlineButton.textContent = "Promptuno";
-  inlineButton.style.top = `${window.scrollY + rect.bottom + 8}px`;
-  inlineButton.style.left = `${Math.min(window.scrollX + rect.right - 112, window.scrollX + window.innerWidth - 124)}px`;
-  inlineButton.addEventListener("click", () => improveText(getCurrentText()));
-  document.body.appendChild(inlineButton);
-}
-
-function showInlineButtonForSelection() {
-  const range = window.getSelection()?.rangeCount ? window.getSelection().getRangeAt(0) : null;
-  if (!range) return;
-  const rect = range.getBoundingClientRect();
-  if (!rect.width && !rect.height) return;
-  removeInlineButton();
-  inlineButton = document.createElement("button");
-  inlineButton.className = "promptuno-inline-button";
-  inlineButton.type = "button";
-  inlineButton.textContent = "Promptuno";
-  inlineButton.style.top = `${window.scrollY + rect.bottom + 8}px`;
-  inlineButton.style.left = `${window.scrollX + rect.left}px`;
-  inlineButton.addEventListener("click", () => improveText(window.getSelection()?.toString() || ""));
-  document.body.appendChild(inlineButton);
-}
 
 async function improveText(text) {
   const input = text.trim();
@@ -177,11 +139,6 @@ function isEditable(target) {
   if (!target) return false;
   const tag = target.tagName;
   return tag === "TEXTAREA" || tag === "INPUT" || target.isContentEditable;
-}
-
-function removeInlineButton() {
-  inlineButton?.remove();
-  inlineButton = null;
 }
 
 function removePanel() {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AppMode, GeneratedPrompt, Platform, RefinementType } from "./types";
 import { useUsageLimit } from "./hooks/useUsageLimit";
 import { useTheme } from "./hooks/useTheme";
@@ -69,17 +69,57 @@ function extractJsonObject(text: string) {
   return null;
 }
 
+function decodeEscapedJsonValue(value: string) {
+  return value
+    .replace(/\\"/g, "\"")
+    .replace(/\\n/g, "\n")
+    .replace(/\\r/g, "\r")
+    .replace(/\\t/g, "\t")
+    .replace(/\\\\/g, "\\")
+    .trim();
+}
+
+function extractJsonStringField(text: string, field: string) {
+  const match = text.match(new RegExp(`"${field}"\\s*:\\s*"([\\s\\S]*?)"(?=\\s*,\\s*"[^"]+"\\s*:|\\s*})`));
+  return match?.[1] ? decodeEscapedJsonValue(match[1]) : null;
+}
+
+function looksLikeHtmlDocument(text: string) {
+  const source = text.trim().toLowerCase();
+  return source.startsWith("<!doctype html") || source.startsWith("<html") || (source.includes("<body") && source.includes("</html>"));
+}
+
+function cleanPromptText(text: string) {
+  return text
+    .replace(/^```(?:json|markdown|md|text)?/i, "")
+    .replace(/```$/i, "")
+    .replace(/^markdown\\?/i, "")
+    .trim();
+}
+
 function parseGeneratedPrompt(text: string, platform: Platform, lang: Language, mode: AppMode): GeneratedPrompt {
+  if (looksLikeHtmlDocument(text)) {
+    return {
+      isNonsense: true,
+      goal: `${mode} prompt strategy in ${lang.toUpperCase()}`,
+      engineeredPrompt: "",
+      explanation: "The AI provider is temporarily unavailable. Please try again in a moment.",
+    };
+  }
+
   const jsonObject = extractJsonObject(text);
 
   if (jsonObject) {
     try {
-      const parsed = JSON.parse(jsonObject);
+      let parsed: any = JSON.parse(jsonObject);
+      if (typeof parsed === "string") {
+        parsed = JSON.parse(parsed);
+      }
       if (parsed && typeof parsed === "object" && parsed.engineeredPrompt) {
         return {
           isNonsense: Boolean(parsed.isNonsense),
           goal: String(parsed.goal || `${mode} prompt architecture for ${platform}`),
-          engineeredPrompt: String(parsed.engineeredPrompt),
+          engineeredPrompt: cleanPromptText(String(parsed.engineeredPrompt)),
           explanation: String(parsed.explanation || "Generated from the user's request."),
         };
       }
@@ -88,11 +128,21 @@ function parseGeneratedPrompt(text: string, platform: Platform, lang: Language, 
     }
   }
 
-  const normalized = text
-    .replace(/^```(?:markdown|md|text)?/i, "")
-    .replace(/```$/i, "")
-    .replace(/^markdown\\?/i, "")
-    .trim();
+  if (text.includes("\"engineeredPrompt\"")) {
+    const engineeredPrompt = extractJsonStringField(text, "engineeredPrompt");
+    if (engineeredPrompt) {
+      return {
+        isNonsense: /"isNonsense"\s*:\s*true/i.test(text),
+        goal: extractJsonStringField(text, "goal") || `${mode} prompt architecture for ${platform}`,
+        engineeredPrompt: cleanPromptText(engineeredPrompt),
+        explanation:
+          extractJsonStringField(text, "explanation") ||
+          "Promptuno recovered a wrapped provider response and cleaned it for you.",
+      };
+    }
+  }
+
+  const normalized = cleanPromptText(text);
 
   return {
     isNonsense: false,
@@ -103,7 +153,7 @@ function parseGeneratedPrompt(text: string, platform: Platform, lang: Language, 
   };
 }
 
-async function generatePromptResponse(systemInstruction: string, contents: string) {
+async function generatePromptResponse(systemInstruction: string, contents: string, signal?: AbortSignal) {
   const strictSystemInstruction = `${systemInstruction}
 
 CRITICAL OUTPUT RULE: Return only one valid JSON object matching the requested schema. Do not return markdown, code fences, prose outside JSON, or labels like "markdown".`;
@@ -119,11 +169,17 @@ CRITICAL OUTPUT RULE: Return only one valid JSON object matching the requested s
       headers: {
         "Content-Type": "application/json",
       },
+      signal,
       body: JSON.stringify({
         systemInstruction: strictSystemInstruction,
         contents,
       }),
-    }).catch(() => null);
+    }).catch((error) => {
+      if (error instanceof Error && error.name === "AbortError") {
+        throw error;
+      }
+      return null;
+    });
 
     if (localResponse?.ok) {
       return localResponse.json();
@@ -150,9 +206,14 @@ CRITICAL OUTPUT RULE: Return only one valid JSON object matching the requested s
   });
   const publicResponse = await fetch(
     `https://text.pollinations.ai/${encodeURIComponent(contents)}?${params.toString()}`,
+    { signal },
   );
 
   const text = await publicResponse.text().catch(() => "");
+
+  if (looksLikeHtmlDocument(text)) {
+    throw new Error("The AI provider is temporarily unavailable. Please try again in a moment.");
+  }
 
   if (!publicResponse.ok) {
     const message =
@@ -190,6 +251,8 @@ export default function App() {
   const [refineAnswers, setRefineAnswers] = useState<string[]>([]);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [isMobileComposerOpen, setIsMobileComposerOpen] = useState(false);
+  const runIdRef = useRef(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
   
   const { isLimitReached, limit, remaining, increment, reset } = useUsageLimit();
   const { theme, toggleTheme } = useTheme();
@@ -218,6 +281,19 @@ export default function App() {
     }
   }, [isMobileViewport]);
 
+  useEffect(() => {
+    return () => abortControllerRef.current?.abort();
+  }, []);
+
+  const cancelGeneration = () => {
+    runIdRef.current += 1;
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+    setIsGenerating(false);
+    setIsAnalyzing(false);
+    setActiveRequest("");
+  };
+
   const handleGenerate = async (refinement?: string) => {
     const inputToUse = refinement || inputValue;
     console.log("handleGenerate called. Mode:", mode, "Input:", inputToUse, "Platform:", platform);
@@ -245,6 +321,11 @@ export default function App() {
     }
 
     setIsGenerating(true);
+    const runId = runIdRef.current + 1;
+    runIdRef.current = runId;
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
     setActiveRequest(inputToUse);
     setCurrentResponse(null);
     setError(null);
@@ -257,7 +338,7 @@ export default function App() {
         mode === "Image"
           ? "Specialize in image-generation prompts. Include subject, composition, style, lighting, camera feel, texture, color direction, and useful exclusions when appropriate."
           : mode === "Vibe"
-            ? "Specialize in vibe-coding prompts. Include role, stack, UX intent, constraints, expected deliverables, acceptance criteria, and a crisp terminal-like structure that still reads premium and modern."
+            ? "Specialize in vibe-coding prompts. Include role, stack, UX intent, constraints, expected deliverables, acceptance criteria, and a crisp terminal-like structure that still reads premium and modern. When the user is integrating a component or rebuilding UI, structure the prompt with stack audit, dependency install commands, component paths, implementation steps, responsive behavior checks, and any shadcn, Tailwind, or TypeScript requirements that matter."
             : "Specialize in high-performance prompts for research, strategy, execution, communication, and structured thinking.";
 
       const systemInstruction = `You are Promptuno, an AI Prompt Architect.
@@ -284,10 +365,12 @@ JSON structure:
       const aiPromise = generatePromptResponse(
         systemInstruction,
         `User said: "${inputToUse}". Generate the best ${mode === "Vibe" ? "vibe coding" : mode.toLowerCase()} prompt for ${platform}.`,
+        controller.signal,
       );
 
       // 2. Short 1s buffer for the "Forging" button state to feel reactive
       await new Promise(resolve => setTimeout(resolve, 800));
+      if (runId !== runIdRef.current) return;
 
       // 3. Transition to the Big Animation immediately while AI is still working
       setIsGenerating(false);
@@ -296,6 +379,7 @@ JSON structure:
 
       // 4. Wait for AI response
       const result = await aiPromise;
+      if (runId !== runIdRef.current) return;
       const responseText = result.text;
       
       const data = parseGeneratedPrompt(responseText, platform, lang, mode);
@@ -316,16 +400,22 @@ JSON structure:
       const waitTime = Math.max(0, minAnimationTime - elapsed);
       
       await new Promise(resolve => setTimeout(resolve, waitTime));
+      if (runId !== runIdRef.current) return;
       
       setIsAnalyzing(false);
       setCurrentResponse(data);
       increment();
+      abortControllerRef.current = null;
 
     } catch (err: any) {
+      if (err?.name === "AbortError" || runId !== runIdRef.current) {
+        return;
+      }
       console.error("Generation error:", err);
       setError(err.message || "Failed to generate prompt. Please try again.");
       setIsGenerating(false);
       setIsAnalyzing(false);
+      abortControllerRef.current = null;
     }
   };
 
@@ -429,6 +519,7 @@ JSON structure:
                       value={inputValue}
                       onChange={handleInputChange}
                       onSend={() => handleGenerate()}
+                      onCancel={cancelGeneration}
                       disabled={isGenerating || isAnalyzing}
                       isGenerating={isGenerating || isAnalyzing}
                       platform={platform}
@@ -494,7 +585,7 @@ JSON structure:
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                   >
-                    <AnalysisLoader platform={platform} mode={mode} lang={lang} request={activeRequest} />
+                    <AnalysisLoader platform={platform} mode={mode} lang={lang} request={activeRequest} onCancel={cancelGeneration} />
                   </motion.div>
                 )}
               </AnimatePresence>

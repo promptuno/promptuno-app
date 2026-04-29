@@ -37,8 +37,8 @@ const modeMeta = {
   },
   vibe: {
     label: "Vibe Code",
-    hint: "Turn rough product ideas into terminal-clean build prompts.",
-    placeholder: "Describe the feature, stack, UX direction, constraints, and output you want from the vibe coding prompt..."
+    hint: "Turn rough product and component ideas into terminal-clean build prompts.",
+    placeholder: "Describe the feature, component, stack, UX direction, constraints, and exact output you want from the vibe coding prompt..."
   }
 };
 

@@ -31,15 +31,6 @@
       "run_at": "document_idle"
     }
   ],
-  "permissions": ["activeTab", "contextMenus", "storage"],
-  "host_permissions": ["https://text.pollinations.ai/*"],
-  "commands": {
-    "promptuno-improve-selection": {
-      "suggested_key": {
-        "default": "Alt+Shift+P",
-        "mac": "Alt+Shift+P"
-      },
-      "description": "Open Promptuno for selected text"
-    }
-  }
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": ["https://text.pollinations.ai/*"]
 }
